@@ -29,5 +29,10 @@ Claude chat and Cowork load the skills and the Salesforce MCP server; the read-o
 | `templates/note.md` | The one-page note |
 | `tests/` | Guard tests: `python3 -I -m unittest discover -s tests` |
 
+## Support
+- Email: apps@mindcat.ai
+- Contact: https://mindcat.ai/contact
+- Privacy policy: https://mindcat.ai/privacy-policy
+
 ## Status
 Scaffold, not yet run against a real Salesforce org. Plan: https://claude.ai/code/artifact/8677d048-1033-4825-a70e-87b1377041f9
