@@ -33,7 +33,7 @@ Keep a summary of 20 lines or fewer per area.
 - The `workflow` check shows which Workflow Rules exist, not whether they are active. Say "exist".
 - `ApexOrgWideCoverage` can read 0% even after a test run (seen in a scratch org on 17 Oct 2026). If it is 0 while Apex classes and a completed test run exist, say coverage wasn't recorded, not that it is 0%, and suggest running all tests once.
 - In `flows`, `ProcessType = Workflow` is a Process Builder, not a Flow. Count Process Builders separately and score them under the Cut rule.
-- If a query returns 200 rows, the list was cut at 200. Say "200 or more" and use the counts query for totals.
+- If a query returns 200 rows, the list was cut at 200. Say "200 or more", not an exact total.
 - No partner claims, no prices, no urgency.
 
 ## 4. Write the note

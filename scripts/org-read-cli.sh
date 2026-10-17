@@ -15,8 +15,7 @@ case "$check" in
     q "SELECT Profile.UserLicense.Name, COUNT(Id) FROM User WHERE IsActive = true AND (LastLoginDate < LAST_N_DAYS:90 OR LastLoginDate = null) GROUP BY Profile.UserLicense.Name"
     q "SELECT Name, TotalLicenses, UsedLicenses, Status FROM UserLicense" ;;
   flows)
-    # Counts first, then at most 200 rows, so a large org doesn't flood the context.
-    q "SELECT ProcessType, IsActive, COUNT(Id) FROM FlowDefinitionView GROUP BY ProcessType, IsActive"
+    # At most 200 rows, so a large org doesn't flood the context (FlowDefinitionView has no COUNT).
     q "SELECT ApiName, Label, ProcessType, TriggerType, TriggerObjectOrEventLabel, TriggerOrder, IsActive, IsOutOfDate, ApiVersion, LastModifiedDate FROM FlowDefinitionView ORDER BY LastModifiedDate DESC LIMIT 200" ;;
   workflow)
     # Tooling WorkflowRule has no Active field; it only shows which rules exist on which object.
