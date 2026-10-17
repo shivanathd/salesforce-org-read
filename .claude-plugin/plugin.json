@@ -16,5 +16,7 @@
     "read-only"
   ],
   "privacyPolicyUrl": "https://mindcat.ai/privacy-policy",
-  "supportUrl": "https://mindcat.ai/contact"
+  "supportUrl": "https://mindcat.ai/contact",
+  "displayName": "Salesforce Org Read",
+  "documentationUrl": "https://github.com/shivanathd/salesforce-org-read#readme"
 }
