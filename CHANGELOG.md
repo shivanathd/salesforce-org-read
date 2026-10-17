@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 0.2.0 (2026-10-17)
 - Legacy metadata versions: Apex saved on API 30 or lower is now tech debt to review, not a Rebuild reason. Salesforce's API 21 to 30 retirement affects API calls, not saved Apex. The note says integrations calling old API versions are not checked.
 - Verdict rules rewritten as Mindcat's own, with numbers. Rebuild needs two independent signals in one area; coverage under 75% alone is not enough.
 - "Cut" now means "review before removing": candidates need a dependency check and a business owner's yes.
@@ -26,6 +28,12 @@
 - Whole-org verdict now covers exactly one Rebuild area (with and without Cut areas).
 - CI pins actions/checkout to a commit SHA and does not keep credentials.
 - README: FAQ, troubleshooting table and an example note with made-up counts.
+- Flow queries return `NamespacePrefix`, so managed-package flows are found by namespace, not only by `__` in the name.
+- `tests` counts your own Apex classes; an org with none scores Finish instead of being scored on coverage. No test runs at all counts as "no completed test run".
+- Verdict outcomes apply in a fixed order (unassessed, rebuild, cut, finish), so every area gets exactly one.
+- `permissions` counts only your own custom permission sets. Free licences (Chatter Free, Chatter External, Guest User) are never seats to review or drop.
+- Ground rules shared by all skills live once, in `org-read` section 0. Skills that call the script declare it in `allowed-tools`.
+- Version 0.2.0; plugin.json declares its icon.
 - Added a Get help section, SECURITY.md, CONTRIBUTING.md, issue templates and a CI check (bash syntax, shellcheck, JSON parse).
 
 ## 0.1.0 (2026-10-17)

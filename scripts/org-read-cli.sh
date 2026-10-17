@@ -9,7 +9,7 @@ if ! command -v sf >/dev/null 2>&1; then
   echo "sf not found: install the Salesforce CLI (https://developer.salesforce.com/tools/salesforcecli), then run sf org login web" >&2
   exit 3
 fi
-usage="usage: bash org-read-cli.sh <org-alias> <org|licences|flows|workflow|triggers|tests|old-code|security|admins|permissions|packages|integrations|async|limits|renewal|recent-changes|flow-descriptions|class-coverage|api-45|fields|inventory> | <org-alias> <object|object-code|field-descriptions> <ObjectApiName>"
+usage="usage: bash org-read-cli.sh <org-alias> <org|licences|flows|workflow|triggers|tests|old-code|security|admins|permissions|packages|integrations|async|limits|renewal|recent-changes|flow-descriptions|class-coverage|api-45|fields|inventory> | <org-alias> <object|field-descriptions> <ObjectApiName> | <org-alias> object-code <DurableId>"
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
   echo "$usage" >&2
   exit 2
@@ -37,17 +37,19 @@ case "$check" in
     q "SELECT MasterLabel, TotalLicenses, UsedLicenses FROM PermissionSetLicense" ;;
   flows)
     # At most 200 rows, so a large org doesn't flood the context (FlowDefinitionView has no COUNT).
-    q "SELECT ApiName, Label, ProcessType, TriggerType, TriggerObjectOrEventLabel, TriggerOrder, IsActive, IsOutOfDate, ApiVersion, LastModifiedDate FROM FlowDefinitionView ORDER BY LastModifiedDate DESC LIMIT 200" ;;
+    q "SELECT ApiName, NamespacePrefix, Label, ProcessType, TriggerType, TriggerObjectOrEventLabel, TriggerOrder, IsActive, IsOutOfDate, ApiVersion, LastModifiedDate FROM FlowDefinitionView ORDER BY LastModifiedDate DESC LIMIT 200" ;;
   workflow)
     # Tooling WorkflowRule has no Active field; it only shows which rules exist on which object.
     qt "SELECT Id, Name, TableEnumOrId FROM WorkflowRule ORDER BY TableEnumOrId LIMIT 200" ;;
   triggers)
     qt "SELECT Name, TableEnumOrId, ApiVersion, Status FROM ApexTrigger WHERE NamespacePrefix = null ORDER BY TableEnumOrId LIMIT 200"
     # Record-triggered flows with the triggering object's Id and API name, to match TableEnumOrId above.
-    q "SELECT ApiName, TriggerType, TriggerOrder, TriggerObjectOrEventId, TriggerObjectOrEvent.QualifiedApiName FROM FlowDefinitionView WHERE TriggerType IN ('RecordBeforeSave', 'RecordAfterSave', 'RecordBeforeDelete') LIMIT 200" ;;
+    q "SELECT ApiName, NamespacePrefix, TriggerType, TriggerOrder, TriggerObjectOrEventId, TriggerObjectOrEvent.QualifiedApiName FROM FlowDefinitionView WHERE TriggerType IN ('RecordBeforeSave', 'RecordAfterSave', 'RecordBeforeDelete') LIMIT 200" ;;
   tests)
     q  "SELECT Id, AsyncApexJobId, Status, StartTime, MethodsCompleted, MethodsFailed FROM ApexTestRunResult ORDER BY StartTime DESC LIMIT 5"
-    qt "SELECT PercentCovered FROM ApexOrgWideCoverage" ;;
+    qt "SELECT PercentCovered FROM ApexOrgWideCoverage"
+    # Whether the org has Apex of its own, so an org with none is not scored on coverage.
+    q  "SELECT COUNT(Id) FROM ApexClass WHERE NamespacePrefix = null" ;;
   old-code)
     # Legacy metadata versions: Apex saved on API 30 or lower. Salesforce's retirement of API versions
     # 21 to 30 (Summer '25) affects API calls made on those versions, not Apex saved at them, so this
@@ -64,9 +66,9 @@ case "$check" in
     q "SELECT COUNT(Id) FROM User WHERE IsActive = true AND Profile.PermissionsModifyAllData = true"
     q "SELECT PermissionSet.Name, COUNT(AssigneeId) FROM PermissionSetAssignment WHERE PermissionSet.PermissionsModifyAllData = true AND PermissionSet.IsOwnedByProfile = false AND Assignee.IsActive = true GROUP BY PermissionSet.Name" ;;
   permissions)
-    # Custom profiles, then permission sets (including managed-package ones).
+    # Custom profiles, then your own custom permission sets (not standard or managed-package ones).
     q "SELECT COUNT(Id) FROM PermissionSet WHERE IsOwnedByProfile = true AND IsCustom = true"
-    q "SELECT COUNT(Id) FROM PermissionSet WHERE IsOwnedByProfile = false" ;;
+    q "SELECT COUNT(Id) FROM PermissionSet WHERE IsOwnedByProfile = false AND IsCustom = true AND NamespacePrefix = null" ;;
   packages)
     qt "SELECT SubscriberPackage.Name, SubscriberPackage.NamespacePrefix, SubscriberPackageVersion.Name FROM InstalledSubscriberPackage LIMIT 200" ;;
   integrations)
@@ -85,9 +87,9 @@ case "$check" in
     # Apex and flows changed in the last 90 days, counted by who changed them.
     q "SELECT LastModifiedBy.Name, COUNT(Id) FROM ApexClass WHERE NamespacePrefix = null AND LastModifiedDate = LAST_N_DAYS:90 GROUP BY LastModifiedBy.Name"
     q "SELECT LastModifiedBy.Name, COUNT(Id) FROM ApexTrigger WHERE NamespacePrefix = null AND LastModifiedDate = LAST_N_DAYS:90 GROUP BY LastModifiedBy.Name"
-    q "SELECT ApiName, LastModifiedBy, LastModifiedDate FROM FlowDefinitionView WHERE LastModifiedDate = LAST_N_DAYS:90 ORDER BY LastModifiedDate DESC LIMIT 200" ;;
+    q "SELECT ApiName, NamespacePrefix, LastModifiedBy, LastModifiedDate FROM FlowDefinitionView WHERE LastModifiedDate = LAST_N_DAYS:90 ORDER BY LastModifiedDate DESC LIMIT 200" ;;
   flow-descriptions)
-    q "SELECT ApiName, ProcessType, IsActive FROM FlowDefinitionView WHERE Description = null ORDER BY ApiName LIMIT 200" ;;
+    q "SELECT ApiName, NamespacePrefix, ProcessType, IsActive FROM FlowDefinitionView WHERE Description = null ORDER BY ApiName LIMIT 200" ;;
   class-coverage)
     # Per class or trigger coverage from the last test runs, plus Ids and names to read it by.
     qt "SELECT ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered FROM ApexCodeCoverageAggregate LIMIT 500"
@@ -110,7 +112,7 @@ case "$check" in
     # validation rules, and flows it triggers. Run object-code with the DurableId for triggers and Workflow Rules.
     qt "SELECT DurableId, QualifiedApiName FROM EntityDefinition WHERE QualifiedApiName = '$obj'"
     qt "SELECT ValidationName, Active FROM ValidationRule WHERE EntityDefinition.QualifiedApiName = '$obj' LIMIT 200"
-    q  "SELECT ApiName, ProcessType, TriggerType, RecordTriggerType, TriggerOrder, IsActive FROM FlowDefinitionView WHERE TriggerObjectOrEvent.QualifiedApiName = '$obj' LIMIT 200" ;;
+    q  "SELECT ApiName, NamespacePrefix, ProcessType, TriggerType, RecordTriggerType, TriggerOrder, IsActive FROM FlowDefinitionView WHERE TriggerObjectOrEvent.QualifiedApiName = '$obj' LIMIT 200" ;;
   object-code)
     # TableEnumOrId holds the name for standard objects and the Id for custom ones: pass the DurableId from object.
     qt "SELECT Name, ApiVersion, Status FROM ApexTrigger WHERE TableEnumOrId = '$obj' LIMIT 200"

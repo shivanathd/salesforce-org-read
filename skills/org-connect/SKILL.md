@@ -1,6 +1,7 @@
 ---
 name: org-connect
 description: Help a Salesforce admin connect the org so the org read can run, either through Salesforce's hosted MCP server or by logging in the sf CLI. Use when the org read cannot reach the org.
+allowed-tools: Bash(bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" *)
 ---
 
 # Connect the org

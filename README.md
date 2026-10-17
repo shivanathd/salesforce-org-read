@@ -61,14 +61,14 @@ You need a Salesforce org you can sign in to. To test without a customer org, si
 
 ## What it runs, sends and fetches
 - **Salesforce hosted MCP server** (`sobject-reads`, read-only by Salesforce's design), at `api.salesforce.com`, which Salesforce runs (not Mindcat), signed in with the customer's own Salesforce login. Query results go to the customer's AI client.
-- **The customer's `sf` CLI**, through `scripts/org-read-cli.sh`: read-only `sf data query` SELECT queries (including the Tooling API) and `sf org list limits`. Signing in with `sf org login web` stores the login on the user's machine, in the Salesforce CLI's own store; the plugin never reads or copies it.
+- **The customer's `sf` CLI**, through `scripts/org-read-cli.sh`: read-only `sf data query` SELECT queries (including the Tooling API) and `sf org list limits`. The skills may also run `sf org list` and `sf sobject describe`, which only read. Signing in with `sf org login web` stores the login on the user's machine, in the Salesforce CLI's own store; the plugin never reads or copies it.
 - **Nothing is sent to Mindcat.** The plugin has no server of its own and no telemetry. Query results are processed by Salesforce and by the AI provider you use.
 - **Uses your own Salesforce login, by design.** The `sf` CLI and the hosted server act as the Salesforce user you signed in as. The plugin never reads, stores or sends that login, and never runs `sf org display`, which would print the access token.
 - **Files.** The plugin writes a file only when you ask: the `org-book` inventory, or a saved note.
 - **No hooks.** The plugin adds no hooks, so it never runs on your other commands or tools. Its skills only use read-only queries; sign in as a read-only Salesforce user so the org itself enforces that.
 
 ## FAQ
-- **Does it change my org?** No. It runs only SELECT queries and `sf org list limits`. Sign in as a read-only user and the org enforces that too.
+- **Does it change my org?** No. It runs only SELECT queries and read-only `sf` commands (`sf org list limits`, `sf org list`, `sf sobject describe`). Sign in as a read-only user and the org enforces that too.
 - **What does Mindcat see?** Nothing. There is no Mindcat server and no telemetry. Query results go to Salesforce and to the AI provider behind your client.
 - **Does it run Apex tests?** No. It reports the last test run that already exists.
 
@@ -87,7 +87,7 @@ This is an illustration with made-up counts. It is not from a real org.
 
 > **Org read, 17 Oct 2026.** Org: …7Q2A, sandbox, Enterprise Edition. Read via both paths; Ids matched.
 >
-> **Verdict: cut (review before removing), then finish.** No area shows two Rebuild signals; Flows and Licences hold candidates to review.
+> **Verdict: cut (review before removing) first, then finish.** No area shows two Rebuild signals; Flows and Licences hold candidates to review.
 >
 > **Unassessed:** 1 of 9 areas. Security: the Health Check queries were denied on both paths (the user lacks a needed permission).
 >
@@ -123,4 +123,4 @@ This is an illustration with made-up counts. It is not from a real org.
 - Privacy policy: [PRIVACY.md](PRIVACY.md). Changes: [CHANGELOG.md](CHANGELOG.md). Contributing: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Status
-Version 0.1.0. The first eight checks have been run against a real Salesforce scratch org, and the two `admins` breakdown queries, `permissions`, `packages`, `integrations`, `async` and the permission set licence query against a real org. The queries listed in [docs/queries-to-test.md](docs/queries-to-test.md) have not been run yet. Test coverage can read 0% even after tests run; the note then keeps the reported value and says it may not have been recorded.
+Version 0.2.0. The first eight checks have been run against a real Salesforce scratch org, and the two `admins` breakdown queries, the custom profile count, `packages`, `integrations`, `async` and the permission set licence query against a real org. The queries listed in [docs/queries-to-test.md](docs/queries-to-test.md) have not been run yet. Test coverage can read 0% even after tests run; the note then keeps the reported value and says it may not have been recorded.

@@ -1,6 +1,6 @@
 # Privacy policy: Mindcat Org Read for Salesforce
 
-Effective 17 October 2026. Publisher: Mindcat Technology Consultants FZE, Dubai. Contact: apps@mindcat.ai.
+Effective 17 October 2026. Publisher: Mindcat (Mindcat Technology Consultants FZE), Dubai. Contact: apps@mindcat.ai.
 
 **In short: no data goes to Mindcat. Query results are processed by Salesforce, which runs your org and its hosted MCP server, and by the AI provider you chose for your client, under their own terms.**
 
