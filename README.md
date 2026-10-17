@@ -4,6 +4,21 @@ A read-only plugin for owners of a stuck Salesforce org. It reads the org and wr
 
 **No data goes to Mindcat. Query results are processed by Salesforce and by the AI provider you chose, under their terms.**
 
+## Skills
+| Skill | What it gives you |
+| --- | --- |
+| `org-read` | The one-page note with finish, cut, rebuild or unassessed per area |
+| `org-connect` | Help connecting the hosted MCP server or the sf CLI |
+| `renewal-prep` | A licence cut-sheet before renewal: seats to review, drop or reassign (no prices) |
+| `handover-audit` | A punch-list for an outgoing partner: recent changes, flows with no description, classes under 75% coverage |
+| `release-readiness` | Apex below API 45 (ICU locale formats) and on API 30 or lower, Process Builders and Workflow Rules |
+| `object-read` | Every trigger, record-triggered flow, Workflow Rule and validation rule count on one object |
+| `field-usage` | Custom fields per object and description fill rate (no record data) |
+| `agent-readiness` | Access model, where logic lives, field descriptions on Account, Contact, Opportunity and Case |
+| `org-book` | A Markdown inventory file, written only when you ask |
+
+Some v0.2 queries have not yet been run on an org; see [docs/queries-to-test.md](docs/queries-to-test.md). A query that fails is reported as unassessed.
+
 ## Before you start
 - **Salesforce edition**: the hosted MCP server needs Enterprise Edition or above, or a Developer Edition org. The sf CLI path works on any org you can log in to with API access.
 - **Salesforce CLI** (`sf`), installed and logged in: `sf org login web --alias <alias>`. The full read needs it, because the hosted server may not reach Tooling API objects (coverage, Workflow Rules, Apex versions, installed packages, Health Check) or org limits.
@@ -49,6 +64,7 @@ You need a Salesforce org you can sign in to. To test without a customer org, si
 - **The customer's `sf` CLI**, through `scripts/org-read-cli.sh`: read-only `sf data query` SELECT queries (including the Tooling API) and `sf org list limits`. Signing in with `sf org login web` stores the login on the user's machine, in the Salesforce CLI's own store; the plugin never reads or copies it.
 - **Nothing is sent to Mindcat.** The plugin has no server of its own and no telemetry. Query results are processed by Salesforce and by the AI provider you use.
 - **Uses your own Salesforce login, by design.** The `sf` CLI and the hosted server act as the Salesforce user you signed in as. The plugin never reads, stores or sends that login, and never runs `sf org display`, which would print the access token.
+- **Files.** The plugin writes a file only when you ask: the `org-book` inventory, or a saved note.
 - **No hooks.** The plugin adds no hooks, so it never runs on your other commands or tools. Its skills only use read-only queries; sign in as a read-only Salesforce user so the org itself enforces that.
 
 ## FAQ
@@ -93,6 +109,8 @@ This is an illustration with made-up counts. It is not from a real org.
 | `skills/org-read` | Main skill: path choice, org check, checks, wording rules, note |
 | `skills/org-connect` | Hosted server, External Client App and sf CLI setup |
 | `skills/verdict` | Finish, cut, rebuild and unassessed rules |
+| `skills/renewal-prep`, `handover-audit`, `release-readiness`, `object-read`, `field-usage`, `agent-readiness`, `org-book` | Focused reads built on the same checks |
+| `docs/queries-to-test.md` | New queries to run on a scratch org before release |
 | `scripts/org-read-cli.sh` | Read-only `sf` queries per check |
 | `.mcp.json`, `mcp.json` | Salesforce hosted `sobject-reads` server (Claude, Cursor) |
 | `templates/note.md` | The one-page note |
@@ -105,4 +123,4 @@ This is an illustration with made-up counts. It is not from a real org.
 - Privacy policy: [PRIVACY.md](PRIVACY.md). Changes: [CHANGELOG.md](CHANGELOG.md). Contributing: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Status
-Version 0.1.0. The first eight checks have been run against a real Salesforce scratch org, and the `admins`, `permissions`, `packages`, `integrations` and `async` queries and the permission set licence query against a real org. Test coverage can read 0% even after tests run; the note then keeps the reported value and says it may not have been recorded.
+Version 0.1.0. The first eight checks have been run against a real Salesforce scratch org, and the two `admins` breakdown queries, `permissions`, `packages`, `integrations`, `async` and the permission set licence query against a real org. The queries listed in [docs/queries-to-test.md](docs/queries-to-test.md) have not been run yet. Test coverage can read 0% even after tests run; the note then keeps the reported value and says it may not have been recorded.

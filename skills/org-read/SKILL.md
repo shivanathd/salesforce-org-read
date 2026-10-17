@@ -29,7 +29,7 @@ Keep a summary of 20 lines or fewer per area.
 | (stamp only) | `org` |
 | Licences | `licences` |
 | Flows | `flows`, `workflow` |
-| Risky automation | `triggers`, compared with record-triggered flows on the same object in `flows` |
+| Risky automation | `triggers` (Apex triggers and record-triggered flows, by object) |
 | Tests | `tests` |
 | Legacy metadata versions | `old-code` |
 | Security | `security`, `admins`, `permissions` |
@@ -37,8 +37,21 @@ Keep a summary of 20 lines or fewer per area.
 | Background jobs | `async` |
 | Limits | `limits` |
 
+Checks used by the other skills (not part of the one-page note):
+
+| Skill | Check names |
+| --- | --- |
+| `renewal-prep` | `licences`, `renewal` |
+| `handover-audit` | `recent-changes`, `flow-descriptions`, `class-coverage` |
+| `release-readiness` | `api-45`, `old-code`, `flows`, `workflow` |
+| `object-read` | `object`, `object-code` (take an object API name or DurableId) |
+| `field-usage` | `fields`, `field-descriptions` (takes an object API name) |
+| `agent-readiness` | `permissions`, `triggers`, `workflow`, `flows`, `field-descriptions` |
+| `org-book` | `inventory`, `fields`, `flows`, `workflow`, `packages`, `integrations` |
+
 ## 4. Unassessed areas
-An area is **unassessed** when its queries failed, were denied (for example the user lacks "View Setup and Configuration"), or are not available on the path used and no other path ran them. An unassessed area gets no finish, cut or rebuild verdict and no invented numbers. Write "unassessed" and the reason (the error code or "not reachable on the hosted path"). If only some of an area's queries ran, score it on what ran and lower its confidence.
+An area is **unassessed** when its queries failed, were denied (for example the user lacks "View Setup and Configuration"), or are not available on the path used and no other path ran them. An unassessed area gets no finish, cut or rebuild verdict and no invented numbers. Write "unassessed" and the reason (the error code or "not reachable on the hosted path"). If only some of an area's queries ran, the missing ones are not evidence of anything. Name the checks that failed. Partial evidence is enough only when what did run already meets a rule on its own: two Rebuild signals, or a Cut candidate. Then score the area on that, mark confidence medium, and say what was not read. Otherwise the area is unassessed, and any findings from the queries that ran are listed as review items. A Finish needs all of the area's queries to have run.
+- Example: if the Health Check queries (`security`) are denied, Security cannot reach two Rebuild signals from `admins` alone, so Security is unassessed: "Security unassessed: SecurityHealthCheck and SecurityHealthCheckRisks denied". Still list the admin and permission counts as review items.
 
 ## 5. Evidence and confidence
 For every finding, note the evidence: the check and object it came from, the row count, and the path used (hosted or CLI). Give each area a confidence:
@@ -56,7 +69,8 @@ For every finding, note the evidence: the check and object it came from, the row
 - Legacy metadata versions (`old-code`): say "Apex saved on API version 30 or lower". Salesforce's retirement of API versions 21 to 30 (Summer '25, Help article 000389618) stops API calls made on those versions; it does not stop Apex classes or triggers saved at them. Call this tech debt to review, never "retired code" and never a reason to rebuild.
 - The note must also say: "Integrations still calling API versions 21 to 30 are not checked by this read; finding them needs Event Log data."
 - Licences: the count is active users with no login in 90 days. Integration or API-only users and frozen users can show here although they are in use or already handled. Present the number as "to review", not "unused" or "wasted".
-- Admins: the profile count and the permission-set count can include the same user twice. Say "up to <sum> users with Modify All Data".
+- Admins: the first `admins` query returns one row per distinct active user with Modify All Data, whether it comes from their profile (a profile is stored as a permission set) or from a permission set. Count its rows: that is the number the verdict rule uses. The other two queries are the breakdown (by profile, by permission set) and can include the same user twice. If the first query failed, use the profile count alone for the rule (each user has one profile, so it counts distinct users) and say "at least <n>"; never add the two breakdown counts together.
+- Matching triggers to flows by object: an Apex trigger's `TableEnumOrId` is the object name for a standard object and an Id for a custom object. Match it to a flow's `TriggerObjectOrEventId`, or for standard objects to `TriggerObjectOrEvent.QualifiedApiName`. If that flow query failed, you may match the `flows` output's `TriggerObjectOrEventLabel` (a label, not an API name) only for standard objects whose label you are sure of, and mark the match low confidence.
 - Permissions: the permission-set count includes sets from installed packages. Say so.
 - Licences also lists permission set licences (`PermissionSetLicense`): report used against total, "to review".
 - Integrations: list Named Credentials and Connected Apps that exist, as an inventory "to review". A listed connected app does not prove it holds tokens or is in use; never say it is "connected" or "active". Installed packages (`packages`) are listed by name and version, "to review" whether each is still used.

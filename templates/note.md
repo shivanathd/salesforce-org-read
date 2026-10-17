@@ -2,7 +2,7 @@
 
 Org: …<last 4 characters of org Id>, <sandbox | production>, <edition>. Read via <hosted MCP | sf CLI | both; Ids matched>.
 
-**Verdict: <finish | cut (review before removing) | rebuild | unassessed>.** <one sentence why>
+**Verdict: <rebuild | rebuild <area>, finish the rest | rebuild <area>, review cut candidates, then finish | finish | cut (review before removing) first, then finish | unassessed>.** <one sentence why>
 
 **Unassessed:** <n> of 9 areas. <area: reason, or "none">
 
@@ -10,7 +10,7 @@ Org: …<last 4 characters of org Id>, <sandbox | production>, <edition>. Read v
 | --- | --- | --- | --- | --- |
 | Licences | | | `licences`: User, UserLicense, PermissionSetLicense | |
 | Flows | | | `flows`, `workflow`: FlowDefinitionView, WorkflowRule | |
-| Risky automation | | | `triggers`, `flows`: ApexTrigger, FlowDefinitionView | |
+| Risky automation | | | `triggers`: ApexTrigger, FlowDefinitionView | |
 | Tests | | | `tests`: ApexTestRunResult, ApexOrgWideCoverage | |
 | Legacy metadata versions | | | `old-code`: ApexClass, ApexTrigger | |
 | Security | | | `security`, `admins`, `permissions`: SecurityHealthCheck, SecurityHealthCheckRisks, User, PermissionSetAssignment, PermissionSet | |

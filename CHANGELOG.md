@@ -18,6 +18,13 @@
 - Note template: evidence and confidence per area, an Unassessed line, the org stamp, and a "Brief you can paste" with counts and verdicts only.
 - Setup: steps to activate `sobject-reads`, create the External Client App and use its Consumer Key as the OAuth Client ID in Claude Code, claude.ai/Cowork and Cursor; a connection check; prerequisites and a read-only user in the README.
 - README and privacy policy say plainly that no data goes to Mindcat, while Salesforce and your AI provider process query results.
+- New skills: `renewal-prep` (licence cut-sheet, no prices), `handover-audit` (punch-list for an outgoing partner), `release-readiness` (Apex below API 45 for ICU locale formats, legacy automation), `object-read` (all automation on one object), `field-usage` (custom field counts and descriptions, no record data), `agent-readiness` (light) and `org-book` (Markdown inventory, written only when asked).
+- New checks: `renewal`, `recent-changes`, `flow-descriptions`, `class-coverage`, `api-45`, `fields`, `inventory`, and `object`, `object-code`, `field-descriptions`, which take an object name checked against `^[A-Za-z0-9_]+$` before it goes into SOQL. Untested queries are listed in `docs/queries-to-test.md`.
+- `admins` counts distinct active users with Modify All Data across profiles and permission sets before applying the "more than 5" rule.
+- `triggers` also lists record-triggered flows with the triggering object's Id and API name, so triggers and flows are matched on the object, not its label.
+- A partly read area is unassessed unless what ran meets a rule on its own; denied Health Check queries make Security unassessed.
+- Whole-org verdict now covers exactly one Rebuild area (with and without Cut areas).
+- CI pins actions/checkout to a commit SHA and does not keep credentials.
 - README: FAQ, troubleshooting table and an example note with made-up counts.
 - Added a Get help section, SECURITY.md, CONTRIBUTING.md, issue templates and a CI check (bash syntax, shellcheck, JSON parse).
 

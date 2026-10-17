@@ -8,7 +8,7 @@ description: Score each area of a Salesforce org read as finish, cut, rebuild or
 These are Mindcat's rules of thumb, not Salesforce rules. Score each area, then the org as a whole. Show the rule next to each verdict, in plain words ("our rule: ...").
 
 ## Outcomes
-- **Unassessed**: the area's queries failed, were denied, or could not run on the path used. Never score an unassessed area finish, cut or rebuild, and never guess its numbers.
+- **Unassessed**: the area's queries failed, were denied, or could not run on the path used, and what did run does not meet a rule on its own (see the `org-read` skill, section 4). Never guess its numbers.
 - **Finish**: the area works. It has fewer than 5 findings to act on and no Rebuild signal.
 - **Cut (review before removing)**: the area holds things that look unused or superseded. They are candidates for migration or removal, not proof that something is duplicated or safe to delete. Before removing anything, check what depends on it (what calls it, what it updates, which reports or integrations use it) and get a yes from the business owner.
 - **Rebuild**: only when an area shows **two or more independent Rebuild signals** from the list below. One signal alone is a finding, not a rebuild.
@@ -26,7 +26,7 @@ These are Mindcat's rules of thumb, not Salesforce rules. Score each area, then 
 - **Security** (needs two):
   - Health Check score under 55;
   - 3 or more high-risk Health Check settings;
-  - more than 5 active users with Modify All Data (profile plus permission sets).
+  - more than 5 distinct active users with Modify All Data (one count across profiles and permission sets; see the `org-read` admins rule).
 - **Risky automation** (needs two):
   - 3 or more objects with both Apex triggers and record-triggered flows;
   - 3 or more objects with two or more Apex triggers each.
@@ -46,7 +46,9 @@ Licences, Flows, Legacy metadata versions, Integrations, Background jobs and Lim
 Count only assessed areas.
 - If more than half the areas are unassessed, give no whole-org verdict: say "unassessed" and what access is needed.
 - **Rebuild** if two or more assessed areas score Rebuild.
+- **Rebuild <area>, finish the rest** if exactly one area scores Rebuild and none scores Cut. Keep the Rebuild finding; there are no removals to review.
+- **Rebuild <area>, review cut candidates, then finish** if exactly one area scores Rebuild and one or more score Cut.
 - **Finish** if no area scores Rebuild and at most one scores Cut.
-- Otherwise **Cut (review before removing) first, then finish**.
+- **Cut (review before removing) first, then finish** if no area scores Rebuild and two or more score Cut.
 
 Always say how many areas were unassessed, for example "8 of 9 areas assessed; Security unassessed (no View Setup and Configuration)".

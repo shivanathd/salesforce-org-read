@@ -17,8 +17,14 @@ done
 
 Install shellcheck with your package manager (`brew install shellcheck`, `apt install shellcheck`) or `pip install shellcheck-py`. If you have the Claude Code CLI, also run `claude plugin validate --strict .`.
 
+## Queries not yet run
+New queries go in `docs/queries-to-test.md` (check, query, standard or Tooling, what to expect) until someone has run them on a scratch org. Use only fields listed in Salesforce's Object Reference or Tooling API reference. Remember that some Tooling objects (EntityDefinition, FieldDefinition and others) ignore `LIMIT` and reject `COUNT`, `GROUP BY`, `OR` and `NOT`.
+
+## Object names
+Checks that take an object name (`object`, `object-code`, `field-descriptions`) must keep the `^[A-Za-z0-9_]+$` check in the script before the name reaches SOQL.
+
 ## Adding a check
 1. Add a `case` to `scripts/org-read-cli.sh`, using `q` (SOQL) or `qt` (Tooling API), each ending in `|| true` through those helpers, with a `LIMIT` on any list.
-2. Add its name to the script's usage line and to the check table in `skills/org-read/SKILL.md`.
+2. Add its name to the script's usage line and to a check table in `skills/org-read/SKILL.md`, and to the skill that uses it.
 3. Add wording rules (what it does not prove) to the org-read skill, and say in `skills/verdict/SKILL.md` how it can affect a verdict.
 4. Add or update its row in `templates/note.md`, and a line in `CHANGELOG.md` under Unreleased.
