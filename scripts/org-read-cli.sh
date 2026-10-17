@@ -8,7 +8,7 @@ if ! command -v sf >/dev/null 2>&1; then
   exit 3
 fi
 if [ $# -ne 2 ]; then
-  echo "usage: bash org-read-cli.sh <org-alias> <org|licences|flows|workflow|triggers|tests|old-code|security|admins|permissions|limits>" >&2
+  echo "usage: bash org-read-cli.sh <org-alias> <org|licences|flows|workflow|triggers|tests|old-code|security|admins|permissions|packages|integrations|async|limits>" >&2
   exit 2
 fi
 org="$1"; check="$2"
@@ -20,7 +20,8 @@ case "$check" in
     q "SELECT Id, Name, OrganizationType, IsSandbox FROM Organization" ;;
   licences)
     q "SELECT Profile.UserLicense.Name, COUNT(Id) FROM User WHERE IsActive = true AND (LastLoginDate < LAST_N_DAYS:90 OR LastLoginDate = null) GROUP BY Profile.UserLicense.Name"
-    q "SELECT Name, TotalLicenses, UsedLicenses, Status FROM UserLicense" ;;
+    q "SELECT Name, TotalLicenses, UsedLicenses, Status FROM UserLicense"
+    q "SELECT MasterLabel, TotalLicenses, UsedLicenses FROM PermissionSetLicense" ;;
   flows)
     # At most 200 rows, so a large org doesn't flood the context (FlowDefinitionView has no COUNT).
     q "SELECT ApiName, Label, ProcessType, TriggerType, TriggerObjectOrEventLabel, TriggerOrder, IsActive, IsOutOfDate, ApiVersion, LastModifiedDate FROM FlowDefinitionView ORDER BY LastModifiedDate DESC LIMIT 200" ;;
@@ -49,6 +50,15 @@ case "$check" in
     # Custom profiles, then permission sets (including managed-package ones).
     q "SELECT COUNT(Id) FROM PermissionSet WHERE IsOwnedByProfile = true AND IsCustom = true"
     q "SELECT COUNT(Id) FROM PermissionSet WHERE IsOwnedByProfile = false" ;;
+  packages)
+    qt "SELECT SubscriberPackage.Name, SubscriberPackage.NamespacePrefix, SubscriberPackageVersion.Name FROM InstalledSubscriberPackage LIMIT 200" ;;
+  integrations)
+    # Named Credentials and Connected Apps that exist. A listed app does not prove it holds tokens.
+    q "SELECT DeveloperName, PrincipalType FROM NamedCredential LIMIT 200"
+    q "SELECT Name FROM ConnectedApplication LIMIT 200" ;;
+  async)
+    # Background Apex jobs from the last 7 days, by type and status.
+    q "SELECT JobType, Status, COUNT(Id), SUM(NumberOfErrors) FROM AsyncApexJob WHERE CreatedDate = LAST_N_DAYS:7 GROUP BY JobType, Status" ;;
   limits)
     sf org list limits --target-org "$org" --json || true ;;
   *) echo "unknown check: $check" >&2; exit 2 ;;

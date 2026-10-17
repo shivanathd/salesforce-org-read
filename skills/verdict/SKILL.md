@@ -14,7 +14,7 @@ These are Mindcat's rules of thumb, not Salesforce rules. Score each area, then 
 - **Rebuild**: only when an area shows **two or more independent Rebuild signals** from the list below. One signal alone is a finding, not a rebuild.
 
 ## Cut candidates (each needs a dependency check and a business-owner yes)
-- Licences: active users with no login in 90 days, "to review" (some may be integration, API-only or frozen users).
+- Licences: active users with no login in 90 days, "to review" (some may be integration, API-only or frozen users); permission set licences with fewer than half used, "to review".
 - Flows: inactive flows you own (leave out managed-package flows); Workflow Rules that exist; Process Builders. Salesforce ended support for Workflow Rules and Process Builder on 31 Dec 2025, so these are migration candidates.
 - Risky automation: an object with both Apex triggers and record-triggered flows. That does not prove they overlap; it means someone should read both.
 
@@ -31,9 +31,11 @@ These are Mindcat's rules of thumb, not Salesforce rules. Score each area, then 
   - 3 or more objects with both Apex triggers and record-triggered flows;
   - 3 or more objects with two or more Apex triggers each.
 
-Licences, Flows, Legacy metadata versions and Limits never score Rebuild under these rules:
+Licences, Flows, Legacy metadata versions, Integrations, Background jobs and Limits never score Rebuild under these rules:
 - **Legacy metadata versions**: Apex saved on API version 30 or lower is tech debt to review. Score Finish with a review list. It is never a Rebuild reason.
-- **Limits**: any limit at 80% or more used is a finding to fix. Score Finish.
+- **Integrations**: Named Credentials, Connected Apps and installed packages are an inventory to review (who owns each, is it still used). Score Finish. A listed connected app does not prove it holds tokens.
+- **Background jobs**: each job type with `Failed` or `Aborted` jobs, or errors, in the last 7 days is a finding to review. Score Finish with the list: failing jobs need an owner to fix them, not removal.
+- **Limits**: of data storage, file storage, daily API requests, single email and hourly published platform events, any at 80% or more used is a finding to fix. Score Finish.
 
 ## Review items (findings, not signals)
 - Two Apex triggers on one object, or two record-triggered flows with the same `TriggerOrder` on one object and trigger type: check the run order.
@@ -47,4 +49,4 @@ Count only assessed areas.
 - **Finish** if no area scores Rebuild and at most one scores Cut.
 - Otherwise **Cut (review before removing) first, then finish**.
 
-Always say how many areas were unassessed, for example "6 of 7 areas assessed; Security unassessed (no View Setup and Configuration)".
+Always say how many areas were unassessed, for example "8 of 9 areas assessed; Security unassessed (no View Setup and Configuration)".

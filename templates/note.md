@@ -4,17 +4,19 @@ Org: …<last 4 characters of org Id>, <sandbox | production>, <edition>. Read v
 
 **Verdict: <finish | cut (review before removing) | rebuild | unassessed>.** <one sentence why>
 
-**Unassessed:** <n> of 7 areas. <area: reason, or "none">
+**Unassessed:** <n> of 9 areas. <area: reason, or "none">
 
 | Area | Verdict | What we found | Evidence (check, object, rows, path) | Confidence |
 | --- | --- | --- | --- | --- |
-| Licences | | | `licences`: User, UserLicense | |
+| Licences | | | `licences`: User, UserLicense, PermissionSetLicense | |
 | Flows | | | `flows`, `workflow`: FlowDefinitionView, WorkflowRule | |
 | Risky automation | | | `triggers`, `flows`: ApexTrigger, FlowDefinitionView | |
 | Tests | | | `tests`: ApexTestRunResult, ApexOrgWideCoverage | |
 | Legacy metadata versions | | | `old-code`: ApexClass, ApexTrigger | |
 | Security | | | `security`, `admins`, `permissions`: SecurityHealthCheck, SecurityHealthCheckRisks, User, PermissionSetAssignment, PermissionSet | |
-| Limits | | | `limits`: /limits | |
+| Integrations | | | `integrations`, `packages`: NamedCredential, ConnectedApplication, InstalledSubscriberPackage | |
+| Background jobs | | | `async`: AsyncApexJob, last 7 days | |
+| Limits | | | `limits`: data and file storage, daily API requests, single email, hourly platform events | |
 
 Verdicts follow the rules in the `verdict` skill. "Cut" means review before removing: check what depends on it and get the business owner's yes first.
 
@@ -28,8 +30,8 @@ Verdicts follow the rules in the `verdict` skill. "Cut" means review before remo
 Read-only: nothing in the org was changed.
 
 **Brief you can paste**
-> Salesforce org read, <date>: <whole-org verdict>; <n> of 7 areas assessed.
-> Licences <verdict>, Flows <verdict>, Risky automation <verdict>, Tests <verdict>, Legacy metadata versions <verdict>, Security <verdict>, Limits <verdict>.
-> <n> licences to review, <n> inactive flows, <n> Process Builders, <n> Workflow Rules, coverage <n>%, <n> high-risk settings.
+> Salesforce org read, <date>: <whole-org verdict>; <n> of 9 areas assessed.
+> Licences <v>, Flows <v>, Risky automation <v>, Tests <v>, Legacy metadata versions <v>, Security <v>, Integrations <v>, Background jobs <v>, Limits <v>.
+> <n> licences to review, <n> inactive flows, <n> Process Builders, <n> Workflow Rules, coverage <n>%, <n> high-risk settings, <n> failing job types.
 
 Want this written up properly? Get the written assessment: https://mindcat.ai/contact/org-stuck

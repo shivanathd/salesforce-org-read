@@ -8,7 +8,7 @@ description: Help a Salesforce admin connect the org so the org read can run, ei
 The hosted server and the sf CLI sign in separately. Either can point at a different org, so finish with the connection check at the end.
 
 ## Hosted MCP server
-Available on Enterprise Edition and above, and on Developer Edition orgs. The hosted server may not reach Tooling API objects (coverage, Workflow Rules, Apex versions, Security Health Check), so the full read also needs the sf CLI.
+Available on Enterprise Edition and above, and on Developer Edition orgs. The hosted server may not reach Tooling API objects (coverage, Workflow Rules, Apex versions, installed packages, Security Health Check) or org limits, so the full read also needs the sf CLI.
 
 An admin does these once in the org:
 1. Turn on the server. Salesforce's standard hosted servers are off by default. In Setup, Quick Find "MCP Servers", open MCP Servers (under API Catalog), then Salesforce Servers, and activate `sobject-reads`.

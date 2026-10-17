@@ -8,7 +8,7 @@ description: Read a Salesforce org without changing it and write a one-page note
 Read-only. Never create, update, delete or deploy anything in the org, and never run Apex tests: report the last test run that already exists. Only run the commands this skill names: `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> <check>`, `sf data query`, `sf org list`, `sf sobject describe`. Never run `sf org display`.
 
 ## 1. Pick the path
-- **Hosted path**: the `salesforce-sobject-reads` MCP server is connected. Use its SOQL query tool for the record and setup objects it accepts. It may not reach Tooling API objects (`ApexOrgWideCoverage`, `WorkflowRule`, `ApexClass`, `ApexTrigger`, Security Health Check), so a full read needs the CLI path.
+- **Hosted path**: the `salesforce-sobject-reads` MCP server is connected. Use its SOQL query tool for the record and setup objects it accepts. It may not reach Tooling API objects (`ApexOrgWideCoverage`, `WorkflowRule`, `ApexClass`, `ApexTrigger`, `InstalledSubscriberPackage`, Security Health Check) or org limits, so a full read needs the CLI path.
 - **CLI path**: the user's `sf` CLI is logged in to the org (`sf org list` shows it). Run each check as its own command, exactly in this form:
   `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> <check>`
   Exit code 3 means `sf` is not installed: use the `org-connect` skill.
@@ -33,6 +33,8 @@ Keep a summary of 20 lines or fewer per area.
 | Tests | `tests` |
 | Legacy metadata versions | `old-code` |
 | Security | `security`, `admins`, `permissions` |
+| Integrations | `integrations`, `packages` |
+| Background jobs | `async` |
 | Limits | `limits` |
 
 ## 4. Unassessed areas
@@ -56,6 +58,10 @@ For every finding, note the evidence: the check and object it came from, the row
 - Licences: the count is active users with no login in 90 days. Integration or API-only users and frozen users can show here although they are in use or already handled. Present the number as "to review", not "unused" or "wasted".
 - Admins: the profile count and the permission-set count can include the same user twice. Say "up to <sum> users with Modify All Data".
 - Permissions: the permission-set count includes sets from installed packages. Say so.
+- Licences also lists permission set licences (`PermissionSetLicense`): report used against total, "to review".
+- Integrations: list Named Credentials and Connected Apps that exist, as an inventory "to review". A listed connected app does not prove it holds tokens or is in use; never say it is "connected" or "active". Installed packages (`packages`) are listed by name and version, "to review" whether each is still used.
+- Background jobs (`async`): counts of Apex jobs from the last 7 days by type and status. Report job types with `Failed` or `Aborted` status, or with errors, as "to review". Seven days is a short window; say so.
+- Limits: from the `limits` output, report only data storage (`DataStorageMB`), file storage (`FileStorageMB`), daily API requests (`DailyApiRequests`), single email (`SingleEmail`) and hourly published platform events (`HourlyPublishedPlatformEvents`), as used of max. Ignore the other limits. If one of these names is missing from the output, say so; do not substitute another.
 - Two Apex triggers on the same object, or the same `TriggerOrder` on two record-triggered flows on the same object and trigger type, are review items: "check the run order". Gaps in `TriggerOrder` numbers are normal (Salesforce suggests spacing like 10, 20, 30); never report them.
 - If a query returns 200 rows, the list was cut at 200. Say "200 or more", not an exact total.
 - No partner claims, no prices, no urgency.

@@ -1,12 +1,12 @@
 # mindcat-org-read
 
-A read-only plugin for owners of a stuck Salesforce org. It reads the org and writes a one-page note on unused licences, inactive and out-of-date flows, Workflow Rules and Process Builders still in the org, the last test run and org-wide coverage, triggers and flows on the same object, Apex saved on old API versions, Security Health Check risks, admin access, profiles and permission sets, and limits. Each area gets a finish, cut (review before removing), rebuild or unassessed verdict with the rule behind it.
+A read-only plugin for owners of a stuck Salesforce org. It reads the org and writes a one-page note on unused licences, inactive and out-of-date flows, Workflow Rules and Process Builders still in the org, the last test run and org-wide coverage, triggers and flows on the same object, Apex saved on old API versions, Security Health Check risks, admin access, profiles and permission sets, Named Credentials, Connected Apps and installed packages, failed background jobs, and key limits. Each area gets a finish, cut (review before removing), rebuild or unassessed verdict with the rule behind it.
 
 **No data goes to Mindcat. Query results are processed by Salesforce and by the AI provider you chose, under their terms.**
 
 ## Before you start
 - **Salesforce edition**: the hosted MCP server needs Enterprise Edition or above, or a Developer Edition org. The sf CLI path works on any org you can log in to with API access.
-- **Salesforce CLI** (`sf`), installed and logged in: `sf org login web --alias <alias>`. The full read needs it, because the hosted server may not reach Tooling API objects (coverage, Workflow Rules, Apex versions, Health Check).
+- **Salesforce CLI** (`sf`), installed and logged in: `sf org login web --alias <alias>`. The full read needs it, because the hosted server may not reach Tooling API objects (coverage, Workflow Rules, Apex versions, installed packages, Health Check) or org limits.
 - **Permission**: the signed-in user needs "View Setup and Configuration" and API access. Areas the user cannot read are reported as unassessed.
 - **Read-only user (recommended)**: sign in as a user on the standard Read Only profile (confirm it has both permissions above), or as a Minimum Access - Salesforce user with a permission set that grants only API Enabled and View Setup and Configuration. Then the org itself blocks any change.
 
@@ -51,6 +51,38 @@ You need a Salesforce org you can sign in to. To test without a customer org, si
 - **Uses your own Salesforce login, by design.** The `sf` CLI and the hosted server act as the Salesforce user you signed in as. The plugin never reads, stores or sends that login, and never runs `sf org display`, which would print the access token.
 - **No hooks.** The plugin adds no hooks, so it never runs on your other commands or tools. Its skills only use read-only queries; sign in as a read-only Salesforce user so the org itself enforces that.
 
+## FAQ
+- **Does it change my org?** No. It runs only SELECT queries and `sf org list limits`. Sign in as a read-only user and the org enforces that too.
+- **What does Mindcat see?** Nothing. There is no Mindcat server and no telemetry. Query results go to Salesforce and to the AI provider behind your client.
+- **Does it run Apex tests?** No. It reports the last test run that already exists.
+
+## Troubleshooting
+| You see | What to do |
+| --- | --- |
+| `AuthDecryptError` from `sf` | The saved login can't be read with the current keychain setting. Log in again with `sf org login web --alias <alias>`; if that fails, follow the Salesforce CLI troubleshooting guide for keychain errors. |
+| `INSUFFICIENT_ACCESS`, another access error, or a "not supported" error on a check | The signed-in user lacks a permission (often View Setup and Configuration). That area is reported as unassessed; ask an admin for the permission, or accept the gap. |
+| OAuth fails with `invalid_client_id` | The External Client App can take up to 30 minutes to start working. Wait and retry, and check the Consumer Key was pasted as the OAuth Client ID. |
+| OAuth redirect fails or shows a callback mismatch | The callback URL in the External Client App must match your client exactly (see the list above). For Cursor, add both callback URLs. |
+| Login page says the user or org is not found | Sandbox logins use `--instance-url https://test.salesforce.com` with `sf`, and the hosted server URL with `/sandbox/` in it. Production and Developer Edition use the plain ones. |
+| The read stops saying the org Ids differ | The hosted server and the CLI are signed in to different orgs. Sign one of them in to the org you want, then run the read again. |
+
+## Sample note (example only)
+This is an illustration with made-up counts. It is not from a real org.
+
+> **Org read, 17 Oct 2026.** Org: …7Q2A, sandbox, Enterprise Edition. Read via both paths; Ids matched.
+>
+> **Verdict: cut (review before removing), then finish.** No area shows two Rebuild signals; Flows and Licences hold candidates to review.
+>
+> **Unassessed:** 1 of 9 areas. Security: the Health Check queries were denied on both paths (the user lacks a needed permission).
+>
+> | Area | Verdict | What we found | Evidence | Confidence |
+> | --- | --- | --- | --- | --- |
+> | Licences | Cut (review) | 14 active users with no login in 90 days, to review | `licences`, User, 3 rows, CLI | High |
+> | Flows | Cut (review) | 9 inactive flows, 4 Process Builders, 12 Workflow Rules exist; 3 managed-package flows left out | `flows`, `workflow`, 61 + 12 rows, CLI | High |
+> | Tests | Finish | Coverage 81%; last run 0 failed methods | `tests`, 5 + 1 rows, CLI | High |
+> | Background jobs | Finish | 1 job type with failed jobs in 7 days, to review | `async`, 6 rows, hosted | High |
+> | ... | | | | |
+
 ## What it does not check
 - Integrations still calling API versions 21 to 30, which Salesforce retired for API calls in Summer '25. Finding them needs Event Log data. The `old-code` check lists Apex saved on API 30 or lower, which is tech debt to review, not code that stopped working.
 - Whether a flow or rule actually runs. Salesforce keeps no general last-run record.
@@ -64,12 +96,13 @@ You need a Salesforce org you can sign in to. To test without a customer org, si
 | `scripts/org-read-cli.sh` | Read-only `sf` queries per check |
 | `.mcp.json`, `mcp.json` | Salesforce hosted `sobject-reads` server (Claude, Cursor) |
 | `templates/note.md` | The one-page note |
+| `.github/workflows/check.yml`, `CONTRIBUTING.md` | CI checks and how to run them locally |
 
 ## Get help
 - **Setup help or a bug**: open a GitHub issue at https://github.com/shivanathd/salesforce-org-read/issues. Never paste tokens, Consumer Keys, org Ids or org data into an issue.
 - **A security problem**: email apps@mindcat.ai. Please don't open a public issue. See [SECURITY.md](SECURITY.md).
 - **Want an expert to look at your org?** https://mindcat.ai/contact/org-stuck
-- Privacy policy: [PRIVACY.md](PRIVACY.md). Changes: [CHANGELOG.md](CHANGELOG.md).
+- Privacy policy: [PRIVACY.md](PRIVACY.md). Changes: [CHANGELOG.md](CHANGELOG.md). Contributing: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Status
-Version 0.1.0. The first eight checks have been run against a real Salesforce scratch org, and the `admins` and `permissions` queries against a real org. Test coverage can read 0% even after tests run; the note then keeps the reported value and says it may not have been recorded.
+Version 0.1.0. The first eight checks have been run against a real Salesforce scratch org, and the `admins`, `permissions`, `packages`, `integrations` and `async` queries and the permission set licence query against a real org. Test coverage can read 0% even after tests run; the note then keeps the reported value and says it may not have been recorded.

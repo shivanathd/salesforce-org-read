@@ -12,11 +12,14 @@
 - Licences with no login in 90 days are "to review": integration, API-only and frozen users can show there.
 - New `org` check: the read compares the org Id on the hosted and CLI paths, refuses to mix two orgs, and stamps the note with the last 4 characters of the Id and sandbox or production.
 - New `admins` and `permissions` checks under Security.
+- New `packages`, `integrations` and `async` checks, shown as Integrations and Background jobs rows in the note; `licences` also reads permission set licences. Their findings are "to review" and never score Rebuild.
+- Limits reports only data storage, file storage, daily API requests, single email and hourly published platform events.
 - The script exits with code 3 and a clear message when `sf` is not installed.
 - Note template: evidence and confidence per area, an Unassessed line, the org stamp, and a "Brief you can paste" with counts and verdicts only.
 - Setup: steps to activate `sobject-reads`, create the External Client App and use its Consumer Key as the OAuth Client ID in Claude Code, claude.ai/Cowork and Cursor; a connection check; prerequisites and a read-only user in the README.
 - README and privacy policy say plainly that no data goes to Mindcat, while Salesforce and your AI provider process query results.
-- Added a Get help section, SECURITY.md, issue templates and a CI check (bash syntax, shellcheck, JSON parse).
+- README: FAQ, troubleshooting table and an example note with made-up counts.
+- Added a Get help section, SECURITY.md, CONTRIBUTING.md, issue templates and a CI check (bash syntax, shellcheck, JSON parse).
 
 ## 0.1.0 (2026-10-17)
 - First release: read-only org read over Salesforce's hosted `sobject-reads` MCP server or the sf CLI, with a one-page note and finish, cut or rebuild verdicts.
