@@ -18,7 +18,7 @@ Available on Enterprise Edition and up, and on Developer Edition orgs for testin
 ## sf CLI
 1. `sf org login web --alias <alias>` (add `--instance-url https://test.salesforce.com` for a sandbox).
 2. `sf org list` to confirm the alias is connected.
-3. If `sf` reports `AuthDecryptError` on macOS, the login was saved with a different keychain setting. Ask the user to run `export SF_USE_GENERIC_UNIX_KEYCHAIN=true` in their shell (or log in again) and retry.
+3. If `sf` reports `AuthDecryptError`, the saved login can't be read with the current keychain setting. Ask the user to log in again with step 1, and if that fails, to follow the Salesforce CLI troubleshooting guide for keychain errors.
 
 Never run `sf org display`: it prints the org's access token into the conversation.
 Do not use the `@salesforce/mcp` DX server: it reaches end of life on 2 Nov 2026.

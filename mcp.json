@@ -1,6 +1,7 @@
 {
   "mcpServers": {
     "salesforce-sobject-reads": {
+      "type": "http",
       "url": "https://api.salesforce.com/platform/mcp/v1/platform/sobject-reads"
     }
   }
