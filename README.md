@@ -35,4 +35,4 @@ Claude chat and Cowork load the skills and the Salesforce MCP server; the read-o
 - Privacy policy: https://mindcat.ai/privacy-policy
 
 ## Status
-Scaffold, not yet run against a real Salesforce org. Plan: https://claude.ai/code/artifact/8677d048-1033-4825-a70e-87b1377041f9
+Version 0.1.0. All eight checks have been run against a real Salesforce scratch org. Test coverage can read 0% even after tests run; the note then says coverage was not recorded.
