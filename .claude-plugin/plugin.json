@@ -15,7 +15,7 @@
     "org health",
     "read-only"
   ],
-  "privacyPolicyUrl": "https://mindcat.ai/privacy-policy",
+  "privacyPolicyUrl": "https://github.com/shivanathd/salesforce-org-read/blob/main/PRIVACY.md",
   "supportUrl": "https://mindcat.ai/contact",
   "displayName": "Mindcat Org Read for Salesforce",
   "documentationUrl": "https://github.com/shivanathd/salesforce-org-read#readme"

@@ -35,7 +35,7 @@ You need a Salesforce org you can sign in to. To test without a customer org, si
 ## Support
 - Email: apps@mindcat.ai
 - Contact: https://mindcat.ai/contact
-- Privacy policy: https://mindcat.ai/privacy-policy
+- Privacy policy: [PRIVACY.md](PRIVACY.md)
 
 ## Status
 Version 0.1.0. All eight checks have been run against a real Salesforce scratch org. Test coverage can read 0% even after tests run; the note then says coverage was not recorded.
