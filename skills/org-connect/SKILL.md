@@ -10,7 +10,8 @@ Available on Enterprise Edition and up, and on Developer Edition orgs for testin
 1. Setup > External Client App Manager > New External Client App.
 2. Enable OAuth. Scopes: `mcp_api` and `refresh_token`. Issue JWT-based access tokens.
 3. Callback URL for the client in use:
-   - Claude (claude.ai, Cowork, and Claude Code when the connector is added on claude.ai): `https://claude.ai/api/mcp/auth_callback`
+   - Claude chat and Cowork (connector added on claude.ai): `https://claude.ai/api/mcp/auth_callback`
+   - Claude Code (this plugin's `.mcp.json` fixes the port): `http://localhost:33418/callback`
    - Cursor: `http://localhost:8787/callback`
 4. Server URL: `https://api.salesforce.com/platform/mcp/v1/platform/sobject-reads` (sandbox: `https://api.salesforce.com/platform/mcp/v1/sandbox/platform/sobject-reads`).
 5. Tell the admin that Salesforce may meter hosted MCP use; check the org's current terms before heavy use.

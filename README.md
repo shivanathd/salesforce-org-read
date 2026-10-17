@@ -21,7 +21,8 @@ Needs Claude Code 2.1.295 or later for the read-only hook.
 - **Salesforce hosted MCP server** (`sobject-reads`, read-only by Salesforce's design), at `api.salesforce.com`, which Salesforce runs (not Mindcat), signed in with the customer's own Salesforce login. Query results go to the customer's AI client.
 - **The customer's `sf` CLI**, through `scripts/org-read-cli.sh`: read-only `sf data query` (including the Tooling API) and `sf org list limits`. Signing in with `sf org login web` stores the login on the user's machine, in the Salesforce CLI's own store; the plugin never reads or copies it.
 - **Nothing is sent to Mindcat.** The plugin has no server of its own and no telemetry.
-- **Read-only hook** (`hooks/read_only_guard.py`): blocks any Salesforce command not on its read-only list, any chained or piped Salesforce command, and fails closed when it can't read a tool call. It never runs `sf org display`, which would print the access token. Use a read-only Salesforce user as well; the hook is a backstop.
+- **Uses your own Salesforce login, by design.** The `sf` CLI and the hosted server act as the Salesforce user you signed in as. The plugin never reads, stores or sends that login, and never runs `sf org display`, which would print the access token.
+- **Read-only hook** (`hooks/read_only_guard.py`): a backstop, not a sandbox. While the plugin is enabled it blocks, in every Claude Code session, any `sf`/`sfdx` shell command not on its read-only list and any chained or piped Salesforce command, and it blocks when it can't read a call. It checks shell commands only; the hosted server is read-only on Salesforce's side. A script that calls Salesforce another way can get round it, so sign in as a read-only Salesforce user. To deploy or change data for other work, disable the plugin with `/plugin disable mindcat-org-read`. The hook runs in Claude Code and Cowork, not in Cursor.
 
 ## Layout
 | Path | What |

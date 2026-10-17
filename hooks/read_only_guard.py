@@ -20,6 +20,10 @@ def block(why):
     sys.exit(2)
 
 
+# Any unexpected error also blocks the call (exit 2) instead of letting it through.
+sys.excepthook = lambda *_: block("internal error, so the call is blocked")
+
+
 try:
     data = json.load(sys.stdin)
     if data["tool_name"] != "Bash":
