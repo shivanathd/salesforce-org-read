@@ -11,7 +11,7 @@ Setup and usage data from the Salesforce org you sign in to: the org's Id, name,
 Everything runs in your own AI client (Claude Code, Cowork, Claude apps or Cursor) and on your own machine. What the plugin reads passes through that client's conversation, under that client's own data terms.
 
 ## What is stored
-The plugin writes nothing to disk unless you ask: to save the one-page note, or for an org book (the `org-book` skill writes a Markdown inventory of counts and metadata names, only when you ask for one, to the path you choose). Your Salesforce login is stored by the Salesforce CLI or your AI client, not by the plugin.
+The plugin writes nothing to disk unless you ask: to save the one-page note, or for an org book (the `org-book` skill writes, only when you ask for one, a Markdown inventory to the path you choose: org identity details (Org Id, name, edition, sandbox flag), the read path used, counts, metadata names and unassessed items). Your Salesforce login is stored by the Salesforce CLI or your AI client, not by the plugin.
 
 ## What Mindcat receives
 Nothing. The plugin has no Mindcat server, sends no data to Mindcat, and has no analytics or telemetry. Mindcat cannot see your data, your files or your use of the plugin.

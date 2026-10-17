@@ -47,8 +47,8 @@ Licences, Flows, Legacy metadata versions, Integrations, Background jobs and Lim
 Count only assessed areas.
 - If more than half the areas are unassessed, give no whole-org verdict: say "unassessed" and what access is needed.
 - **Rebuild** if two or more assessed areas score Rebuild.
-- **Rebuild <area>, finish the rest** if exactly one area scores Rebuild and none scores Cut. Keep the Rebuild finding; there are no removals to review.
-- **Rebuild <area>, review cut candidates, then finish** if exactly one area scores Rebuild and one or more score Cut.
+- **Rebuild <area>, finish the rest** if exactly one area scores Rebuild and there are no Cut candidates anywhere, including inside the Rebuild area. Keep the Rebuild finding.
+- **Rebuild <area>, review cut candidates, then finish** if exactly one area scores Rebuild and any area (the Rebuild area included) has Cut candidates.
 - **Finish** if no area scores Rebuild and at most one scores Cut.
 - **Cut (review before removing) first, then finish** if no area scores Rebuild and two or more score Cut.
 
