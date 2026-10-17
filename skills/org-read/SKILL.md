@@ -5,7 +5,7 @@ description: Read a Salesforce org without changing it and write a one-page note
 
 # Org read
 
-Read-only. Never create, update, delete or deploy anything in the org, and never run Apex tests: report the last test run that already exists. The plugin's hook blocks Salesforce commands that are not on its read-only list.
+Read-only. Never create, update, delete or deploy anything in the org, and never run Apex tests: report the last test run that already exists. Only run the commands this skill names: `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> <check>`, `sf data query`, `sf org list`, `sf sobject describe`. Never run `sf org display`.
 
 ## 1. Pick the path
 - **Hosted path**: the `salesforce-sobject-reads` MCP server is connected. Use its SOQL query tool for the record and setup objects it accepts.
