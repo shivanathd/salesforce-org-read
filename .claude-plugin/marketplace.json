@@ -1,0 +1,15 @@
+{
+  "name": "mindcat",
+  "owner": {
+    "name": "Mindcat"
+  },
+  "description": "Mindcat plugins",
+  "plugins": [
+    {
+      "name": "mindcat-org-read",
+      "source": "./",
+      "description": "Read-only Salesforce org read. Writes a one-page note on unused licences, stale flows, failing tests and risky automation, with a finish, cut or rebuild verdict per area.",
+      "version": "0.1.0"
+    }
+  ]
+}
