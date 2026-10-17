@@ -1,6 +1,14 @@
 # mindcat-org-read
 
-A read-only plugin for owners of a stuck Salesforce org. It reads the org and writes a one-page note on unused licences, inactive and out-of-date flows, Workflow Rules still in the org, the last test run and org-wide coverage, triggers and flows firing on the same object, code on retiring API versions, Security Health Check risks and limits. Each area gets a finish, cut or rebuild verdict with the rule behind it.
+A read-only plugin for owners of a stuck Salesforce org. It reads the org and writes a one-page note on unused licences, inactive and out-of-date flows, Workflow Rules and Process Builders still in the org, the last test run and org-wide coverage, triggers and flows on the same object, Apex saved on old API versions, Security Health Check risks, admin access, profiles and permission sets, and limits. Each area gets a finish, cut (review before removing), rebuild or unassessed verdict with the rule behind it.
+
+**No data goes to Mindcat. Query results are processed by Salesforce and by the AI provider you chose, under their terms.**
+
+## Before you start
+- **Salesforce edition**: the hosted MCP server needs Enterprise Edition or above, or a Developer Edition org. The sf CLI path works on any org you can log in to with API access.
+- **Salesforce CLI** (`sf`), installed and logged in: `sf org login web --alias <alias>`. The full read needs it, because the hosted server may not reach Tooling API objects (coverage, Workflow Rules, Apex versions, Health Check).
+- **Permission**: the signed-in user needs "View Setup and Configuration" and API access. Areas the user cannot read are reported as unassessed.
+- **Read-only user (recommended)**: sign in as a user on the standard Read Only profile (confirm it has both permissions above), or as a Minimum Access - Salesforce user with a permission set that grants only API Enabled and View Setup and Configuration. Then the org itself blocks any change.
 
 ## Install
 ```
@@ -9,33 +17,59 @@ A read-only plugin for owners of a stuck Salesforce org. It reads the org and wr
 ```
 Claude chat, Cowork and Claude Code load the skills and the Salesforce MCP server. Cursor reads `.cursor-plugin/plugin.json` and `mcp.json`.
 
+## Connect the hosted MCP server (optional)
+Salesforce's standard hosted MCP servers are off by default. An admin sets this up once:
+1. In Setup, Quick Find "MCP Servers", open MCP Servers (under API Catalog), then Salesforce Servers, and activate `sobject-reads`.
+2. Create an External Client App (Setup > External Client App Manager). Enable OAuth with scopes `mcp_api` and `refresh_token`, issue JWT-based access tokens for named users, and add the callback URL for your client (below). It can take up to 30 minutes to start working.
+3. Copy the app's Consumer Key (Settings > OAuth Settings > Consumer Key and Secret). Your AI client uses it as the OAuth Client ID.
+
+Then, per client:
+- **Claude Code**: callback `http://localhost:33418/callback`. Run `/mcp`, pick `salesforce-sobject-reads` and give the Consumer Key as the client ID. If your version does not ask: `claude mcp add --transport http --client-id <consumer key> --callback-port 33418 salesforce-sobject-reads <server URL>`.
+- **Claude chat and Cowork (claude.ai)**: callback `https://claude.ai/api/mcp/auth_callback`. Add a custom connector with the server URL; under Advanced settings, paste the Consumer Key into OAuth Client ID.
+- **Cursor**: callbacks `http://localhost:8787/callback` and `cursor://anysphere.cursor-mcp/oauth/callback` (some versions use the second; add both). In Cursor's MCP config for the server, add `"auth": { "CLIENT_ID": "<consumer key>" }`. The shipped `mcp.json` has no key, because each org has its own.
+
+Server URL: `https://api.salesforce.com/platform/mcp/v1/platform/sobject-reads` (sandbox or scratch: `https://api.salesforce.com/platform/mcp/v1/sandbox/platform/sobject-reads`).
+
+**Check the connection**: ask Claude to run the `org` check. It reads `Organization` (Id, edition, sandbox or production) on each path. If the hosted server and the CLI point at different orgs, the read stops instead of mixing results.
+
+Salesforce's guides:
+- Get started: https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/hosted-mcp-servers-overview.html
+- Create an External Client App: https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/create-external-client-app.html
+- SObject Reads server: https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/sobject-reads.html
+- Standard servers (off by default): https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/servers-reference.html
+
 ## Try it
 You need a Salesforce org you can sign in to. To test without a customer org, sign up for a free Developer Edition at https://developer.salesforce.com/signup, then run `sf org login web --alias my-dev` once. Then ask Claude:
 - "Read my Salesforce org my-dev and tell me what to finish, cut or rebuild."
 - "Which flows in my-dev are inactive or on an old API version?"
-- "How many Salesforce licences in my-dev are assigned but unused?"
+- "How many Salesforce licences in my-dev are assigned to users who haven't logged in for 90 days?"
 
 ## What it runs, sends and fetches
 - **Salesforce hosted MCP server** (`sobject-reads`, read-only by Salesforce's design), at `api.salesforce.com`, which Salesforce runs (not Mindcat), signed in with the customer's own Salesforce login. Query results go to the customer's AI client.
-- **The customer's `sf` CLI**, through `scripts/org-read-cli.sh`: read-only `sf data query` (including the Tooling API) and `sf org list limits`. Signing in with `sf org login web` stores the login on the user's machine, in the Salesforce CLI's own store; the plugin never reads or copies it.
-- **Nothing is sent to Mindcat.** The plugin has no server of its own and no telemetry.
+- **The customer's `sf` CLI**, through `scripts/org-read-cli.sh`: read-only `sf data query` SELECT queries (including the Tooling API) and `sf org list limits`. Signing in with `sf org login web` stores the login on the user's machine, in the Salesforce CLI's own store; the plugin never reads or copies it.
+- **Nothing is sent to Mindcat.** The plugin has no server of its own and no telemetry. Query results are processed by Salesforce and by the AI provider you use.
 - **Uses your own Salesforce login, by design.** The `sf` CLI and the hosted server act as the Salesforce user you signed in as. The plugin never reads, stores or sends that login, and never runs `sf org display`, which would print the access token.
 - **No hooks.** The plugin adds no hooks, so it never runs on your other commands or tools. Its skills only use read-only queries; sign in as a read-only Salesforce user so the org itself enforces that.
+
+## What it does not check
+- Integrations still calling API versions 21 to 30, which Salesforce retired for API calls in Summer '25. Finding them needs Event Log data. The `old-code` check lists Apex saved on API 30 or lower, which is tech debt to review, not code that stopped working.
+- Whether a flow or rule actually runs. Salesforce keeps no general last-run record.
 
 ## Layout
 | Path | What |
 | --- | --- |
-| `skills/org-read` | Main skill: path choice, checks, wording rules, note |
-| `skills/org-connect` | External Client App and sf CLI setup |
-| `skills/verdict` | Finish, cut or rebuild rules |
+| `skills/org-read` | Main skill: path choice, org check, checks, wording rules, note |
+| `skills/org-connect` | Hosted server, External Client App and sf CLI setup |
+| `skills/verdict` | Finish, cut, rebuild and unassessed rules |
 | `scripts/org-read-cli.sh` | Read-only `sf` queries per check |
 | `.mcp.json`, `mcp.json` | Salesforce hosted `sobject-reads` server (Claude, Cursor) |
 | `templates/note.md` | The one-page note |
 
-## Support
-- Email: apps@mindcat.ai
-- Contact: https://mindcat.ai/contact
-- Privacy policy: [PRIVACY.md](PRIVACY.md)
+## Get help
+- **Setup help or a bug**: open a GitHub issue at https://github.com/shivanathd/salesforce-org-read/issues. Never paste tokens, Consumer Keys, org Ids or org data into an issue.
+- **A security problem**: email apps@mindcat.ai. Please don't open a public issue. See [SECURITY.md](SECURITY.md).
+- **Want an expert to look at your org?** https://mindcat.ai/contact/org-stuck
+- Privacy policy: [PRIVACY.md](PRIVACY.md). Changes: [CHANGELOG.md](CHANGELOG.md).
 
 ## Status
-Version 0.1.0. All eight checks have been run against a real Salesforce scratch org. Test coverage can read 0% even after tests run; the note then says coverage was not recorded.
+Version 0.1.0. The first eight checks have been run against a real Salesforce scratch org, and the `admins` and `permissions` queries against a real org. Test coverage can read 0% even after tests run; the note then keeps the reported value and says it may not have been recorded.

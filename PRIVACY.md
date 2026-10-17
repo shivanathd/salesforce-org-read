@@ -2,8 +2,10 @@
 
 Effective 17 October 2026. Publisher: Mindcat Technology Consultants FZE, Dubai. Contact: apps@mindcat.ai.
 
+**In short: no data goes to Mindcat. Query results are processed by Salesforce, which runs your org and its hosted MCP server, and by the AI provider you chose for your client, under their own terms.**
+
 ## What the plugin reads
-Setup and usage data from the Salesforce org you sign in to: user and licence counts, last-login dates, flows, Workflow Rules, triggers, Apex test results and API versions, security settings and org limits. It reads this with your own Salesforce login, through the Salesforce CLI or Salesforce's hosted MCP server.
+Setup and usage data from the Salesforce org you sign in to: the org's Id, edition and sandbox flag, user and licence counts, last-login dates, flows, Workflow Rules, triggers, Apex test results and API versions, security settings, counts of users with Modify All Data, profile and permission set counts, and org limits. It reads this with your own Salesforce login, through the Salesforce CLI or Salesforce's hosted MCP server.
 
 ## Where it runs
 Everything runs in your own AI client (Claude Code, Cowork, Claude apps or Cursor) and on your own machine. What the plugin reads passes through that client's conversation, under that client's own data terms.
@@ -15,7 +17,7 @@ The plugin writes nothing to disk unless you ask Claude to save the one-page not
 Nothing. The plugin has no Mindcat server, sends no data to Mindcat, and has no analytics or telemetry. Mindcat cannot see your data, your files or your use of the plugin.
 
 ## Third parties
-The plugin sends data to no third party. Queries go from your machine or AI client to your own Salesforce org, through Salesforce's own services.
+The plugin itself sends data to no third party. Queries go from your machine or AI client to your own Salesforce org, through Salesforce's own services. The results are then processed by Salesforce and by the AI provider behind your client (for example Anthropic for Claude), under that provider's terms. Mindcat is not one of them.
 
 ## Retention and deletion
 Mindcat retains nothing, because it receives nothing. Files the plugin writes are on your disk; delete them when you like. Uninstall the plugin with `/plugin uninstall`.

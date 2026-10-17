@@ -1,14 +1,50 @@
 ---
 name: verdict
-description: Score each area of a Salesforce org read as finish, cut or rebuild, using written rules the owner can argue with. Use after the org-read checks have run.
+description: Score each area of a Salesforce org read as finish, cut, rebuild or unassessed, using written rules the owner can argue with. Use after the org-read checks have run.
 ---
 
 # Verdict rules
 
-Score each area, then the org as a whole. Show the rule next to each verdict.
+These are Mindcat's rules of thumb, not Salesforce rules. Score each area, then the org as a whole. Show the rule next to each verdict, in plain words ("our rule: ...").
 
-- **Finish**: the area works and has a short list of fixes (fewer than 5 findings, none high-risk).
-- **Cut**: the area is unused or duplicated: unused licences, inactive flows, Workflow Rules or Process Builder still in the org (support ended 31 Dec 2025), triggers and flows both firing on one object.
-- **Rebuild**: high-risk security settings, org coverage under 75%, failing tests on core objects, or many classes and triggers on API versions 21 to 30, which Salesforce retired in Summer '25.
+## Outcomes
+- **Unassessed**: the area's queries failed, were denied, or could not run on the path used. Never score an unassessed area finish, cut or rebuild, and never guess its numbers.
+- **Finish**: the area works. It has fewer than 5 findings to act on and no Rebuild signal.
+- **Cut (review before removing)**: the area holds things that look unused or superseded. They are candidates for migration or removal, not proof that something is duplicated or safe to delete. Before removing anything, check what depends on it (what calls it, what it updates, which reports or integrations use it) and get a yes from the business owner.
+- **Rebuild**: only when an area shows **two or more independent Rebuild signals** from the list below. One signal alone is a finding, not a rebuild.
 
-Whole org: rebuild if two or more areas score rebuild; finish if none score rebuild and most score finish; otherwise cut first, then finish.
+## Cut candidates (each needs a dependency check and a business-owner yes)
+- Licences: active users with no login in 90 days, "to review" (some may be integration, API-only or frozen users).
+- Flows: inactive flows you own (leave out managed-package flows); Workflow Rules that exist; Process Builders. Salesforce ended support for Workflow Rules and Process Builder on 31 Dec 2025, so these are migration candidates.
+- Risky automation: an object with both Apex triggers and record-triggered flows. That does not prove they overlap; it means someone should read both.
+
+## Rebuild signals, by area
+- **Tests** (needs two):
+  - org-wide coverage reported under 75% (not a reported 0% that may not have been recorded);
+  - the latest completed test run has failed methods (`MethodsFailed` above 0);
+  - no completed test run in the last 5 runs.
+- **Security** (needs two):
+  - Health Check score under 55;
+  - 3 or more high-risk Health Check settings;
+  - more than 5 active users with Modify All Data (profile plus permission sets).
+- **Risky automation** (needs two):
+  - 3 or more objects with both Apex triggers and record-triggered flows;
+  - 3 or more objects with two or more Apex triggers each.
+
+Licences, Flows, Legacy metadata versions and Limits never score Rebuild under these rules:
+- **Legacy metadata versions**: Apex saved on API version 30 or lower is tech debt to review. Score Finish with a review list. It is never a Rebuild reason.
+- **Limits**: any limit at 80% or more used is a finding to fix. Score Finish.
+
+## Review items (findings, not signals)
+- Two Apex triggers on one object, or two record-triggered flows with the same `TriggerOrder` on one object and trigger type: check the run order.
+- More than 20 custom profiles: access is hard to review.
+- Coverage reported as 0%: may not have been recorded; run all tests once.
+
+## Whole org
+Count only assessed areas.
+- If more than half the areas are unassessed, give no whole-org verdict: say "unassessed" and what access is needed.
+- **Rebuild** if two or more assessed areas score Rebuild.
+- **Finish** if no area scores Rebuild and at most one scores Cut.
+- Otherwise **Cut (review before removing) first, then finish**.
+
+Always say how many areas were unassessed, for example "6 of 7 areas assessed; Security unassessed (no View Setup and Configuration)".
