@@ -1,0 +1,13 @@
+{
+  "name": "NamedOrgNotFoundError",
+  "message": "Parsing --target-org \n\tNo authorization information found for no-such-alias-xyz.\nSee more help with --help",
+  "exitCode": 2,
+  "actions": [
+    "It looks like you mistyped the username or alias. Did you mean \"mc-orgread-test\"?"
+  ],
+  "context": "DataSoqlQueryCommand",
+  "warnings": [],
+  "code": "NamedOrgNotFoundError",
+  "status": 2,
+  "commandName": "DataSoqlQueryCommand"
+}

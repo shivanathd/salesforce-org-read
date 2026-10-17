@@ -1,0 +1,33 @@
+{
+  "status": 0,
+  "result": {
+    "records": [
+      {
+        "attributes": {
+          "type": "ApexTrigger",
+          "url": "/services/data/v68.0/tooling/sobjects/ApexTrigger/01qE200000FLGIrIAP"
+        },
+        "Name": "LegacyAccountTrigger",
+        "TableEnumOrId": "Account",
+        "ApiVersion": 30,
+        "Status": "Active"
+      }
+    ],
+    "totalSize": 1,
+    "done": true
+  },
+  "warnings": []
+}
+{
+  "name": "NamedOrgNotFoundError",
+  "message": "Parsing --target-org \n\tNo authorization information found for no-such-alias-xyz.\nSee more help with --help",
+  "exitCode": 2,
+  "actions": [
+    "It looks like you mistyped the username or alias. Did you mean \"mc-orgread-test\"?"
+  ],
+  "context": "DataSoqlQueryCommand",
+  "warnings": [],
+  "code": "NamedOrgNotFoundError",
+  "status": 2,
+  "commandName": "DataSoqlQueryCommand"
+}
