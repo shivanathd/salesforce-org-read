@@ -9,6 +9,7 @@
 - `old-code` renamed `legacy-versions`, with Apex on API 30 or lower and 31 to 44 as review items. It no longer says this code breaks.
 - Trigger order gaps are no longer flagged; only missing or duplicate TriggerOrder.
 - Script checks for `sf` up front and exits 1 when any query failed.
+- `object` matches custom objects by their Id, includes managed triggers and lists active Process Builder org-wide. `admin-sprawl` counts distinct users. `renewal` covers paid licences and frozen users.
 - New skills: `renewal-prep`, `object-read`. Fuller hosted MCP setup in `org-connect`; Cursor `mcp.json` has the `auth` block.
 - `scripts/summarise.py`, unit tests with saved scratch-org output, CI (shellcheck and tests).
 - SECURITY, CONTRIBUTING, issue templates, sample note, FAQ and troubleshooting. Help links point to https://mindcat.ai/contact/org-stuck.

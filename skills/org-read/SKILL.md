@@ -22,7 +22,7 @@ Keep a summary of 20 lines or fewer per area.
 
 | Area | Check names |
 | --- | --- |
-| Licences | `licences` (user licences, permission set licences, active seats with no login in 90 days) |
+| Licences | `licences` (active seats with no login in 90 days, user licences, permission set licences) |
 | Flows | `flows`, `workflow` |
 | Risky automation | `triggers`, compared with record-triggered flows on the same object |
 | Tests | `tests`, `async-failures` |
@@ -46,13 +46,14 @@ For a partner handover or takeover, also run `handover` and `fields`. Report cou
 - Name the object each finding came from.
 - Never say a flow "never runs". Salesforce has no general last-run record. Say "inactive", "out of date" or "not changed since <date>".
 - The `workflow` check shows which Workflow Rules exist, not whether they are active. Say "exist".
-- In `flows`, the second query lists Process Builder processes (`ProcessType` in Workflow, CustomEvent, InvocableProcess). Count them separately from Flows.
+- In `flows`, rows with `ProcessType` Workflow, CustomEvent or InvocableProcess are Process Builder processes. Count them separately from Flows.
 - Workflow Rules, Process Builder, inactive flows, and a trigger plus a flow on the same object are **migration or review candidates**. They do not prove duplication or that removal is safe. Write "candidate to cut, confirm with the owner": the plugin cannot check dependencies or business use.
 - Record-triggered flows on one object: flag only flows with no TriggerOrder, or two flows with the same TriggerOrder. Gaps such as 10, 20, 30 are normal; Salesforce recommends them.
 - Coverage: report ApexOrgWideCoverage as it reads. If it is 0% while a completed test run exists, add that coverage may not have been aggregated, and suggest running all tests once. Do not assert either way.
 - Legacy metadata versions: Apex on API 30 or lower is old metadata, and 31 to 44 is below 45. These are review items. Salesforce's API 21 to 30 retirement applies to API calls made with those versions, not to the version Apex is saved on, so never say this code breaks. The plugin cannot see which integrations call old API versions; Event Monitoring (API Total Usage) shows that. Salesforce's ICU locale guidance asks for Apex and Visualforce that format dates, numbers or currencies to be on API 45.0 or later.
 - Licences: the inactive-seat count leaves out frozen users and integration licences. Users who never logged in count as inactive.
-- Admin sprawl: report how many active users have Modify All Data through a profile, and how many through a permission set.
+- Admin sprawl: each row is one distinct active user with Modify All Data, through a profile or a permission set. Frozen users and integration licences are left out.
+- Access model: `permission-debt` gives custom profiles, then custom unmanaged permission sets (not owned by a profile or a permission set group).
 - Limits: report DataStorageMB, FileStorageMB, DailyApiRequests, SingleEmail and HourlyPublishedPlatformEvents first, as used of max. Mention others only if over 80% used.
 - No partner claims, no prices, no urgency.
 

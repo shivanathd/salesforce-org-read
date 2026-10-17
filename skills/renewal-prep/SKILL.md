@@ -8,19 +8,21 @@ description: Read a Salesforce org's licence use before a contract renewal and w
 Read-only, same rules as the `org-read` skill (CLI path, never `sf org display`). Run the `org` check first and put the Org Id and name at the top.
 
 Run:
-- `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> licences`: user licences (total and used), permission set licences, active seats with no login in 90 days.
-- `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> renewal`: active seats with no login in 60 and in 90 days, per licence.
+- `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> renewal`: paid user licences (total and used), active seats with no login in 60 days, and frozen users, per licence.
+- `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> licences`: use its first result (active seats with no login in 90 days) and its permission set licences.
 
 Check each JSON `status`; a failed query is Unassessed with its error name.
 
+Paid licences only: the `renewal` check leaves out free licences (Chatter Free, Chatter External, Guest, Identity) and integration licences. Ignore rows for those licences in the 90-day result.
+
 Write the cut-sheet as one table:
 
-| Licence | Total | Used | No login 60 days | No login 90 days | Seats you could drop |
-| --- | --- | --- | --- | --- | --- |
+| Licence | Total | Used | No login 60 days | No login 90 days | Frozen | Seats you could drop |
+| --- | --- | --- | --- | --- | --- | --- |
 
-- Seats you could drop = (Total minus Used) plus the 90-day count. Show the sum; the owner decides.
+- Seats you could drop = (Total minus Used) plus the 90-day count plus frozen users. Frozen users are not in the 60 or 90-day counts, so nothing is counted twice. The owner decides.
 - Add permission set licences with Total above 0 as a second table: Total, Used, unused.
-- The counts leave out frozen users and integration licences. Users who never logged in count as inactive.
+- Users who never logged in count as inactive.
 - Say these are candidates: confirm with each user's manager before removing anyone, since some users log in rarely by design.
 - No prices. Leave a Price column blank for the owner if they ask for one.
 
