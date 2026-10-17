@@ -15,19 +15,21 @@ case "$check" in
     q "SELECT Profile.UserLicense.Name, COUNT(Id) FROM User WHERE IsActive = true AND (LastLoginDate < LAST_N_DAYS:90 OR LastLoginDate = null) GROUP BY Profile.UserLicense.Name"
     q "SELECT Name, TotalLicenses, UsedLicenses, Status FROM UserLicense" ;;
   flows)
-    q "SELECT ApiName, Label, ProcessType, TriggerType, TriggerObjectOrEventLabel, TriggerOrder, IsActive, IsOutOfDate, ApiVersion, LastModifiedDate FROM FlowDefinitionView" ;;
+    # Counts first, then at most 200 rows, so a large org doesn't flood the context.
+    q "SELECT ProcessType, IsActive, COUNT(Id) FROM FlowDefinitionView GROUP BY ProcessType, IsActive"
+    q "SELECT ApiName, Label, ProcessType, TriggerType, TriggerObjectOrEventLabel, TriggerOrder, IsActive, IsOutOfDate, ApiVersion, LastModifiedDate FROM FlowDefinitionView ORDER BY LastModifiedDate DESC LIMIT 200" ;;
   workflow)
     # Tooling WorkflowRule has no Active field; it only shows which rules exist on which object.
-    qt "SELECT Id, Name, TableEnumOrId FROM WorkflowRule" ;;
+    qt "SELECT Id, Name, TableEnumOrId FROM WorkflowRule ORDER BY TableEnumOrId LIMIT 200" ;;
   triggers)
-    qt "SELECT Name, TableEnumOrId, ApiVersion, Status FROM ApexTrigger WHERE NamespacePrefix = null" ;;
+    qt "SELECT Name, TableEnumOrId, ApiVersion, Status FROM ApexTrigger WHERE NamespacePrefix = null ORDER BY TableEnumOrId LIMIT 200" ;;
   tests)
     q  "SELECT Id, AsyncApexJobId, Status, StartTime, MethodsCompleted, MethodsFailed FROM ApexTestRunResult ORDER BY StartTime DESC LIMIT 5"
     qt "SELECT PercentCovered FROM ApexOrgWideCoverage" ;;
   old-code)
-    # API versions 21 to 30 are the ones Salesforce is retiring.
-    qt "SELECT Name, ApiVersion FROM ApexClass WHERE NamespacePrefix = null AND ApiVersion <= 30"
-    qt "SELECT Name, ApiVersion FROM ApexTrigger WHERE NamespacePrefix = null AND ApiVersion <= 30" ;;
+    # Salesforce retired API versions 21 to 30 in Summer '25; code saved on them can stop working.
+    qt "SELECT Name, ApiVersion FROM ApexClass WHERE NamespacePrefix = null AND ApiVersion <= 30 ORDER BY ApiVersion LIMIT 200"
+    qt "SELECT Name, ApiVersion FROM ApexTrigger WHERE NamespacePrefix = null AND ApiVersion <= 30 ORDER BY ApiVersion LIMIT 200" ;;
   security)
     qt "SELECT Score FROM SecurityHealthCheck"
     qt "SELECT RiskType, Setting, SettingGroup, OrgValue, StandardValue FROM SecurityHealthCheckRisks WHERE RiskType = 'HIGH_RISK'" ;;

@@ -32,7 +32,9 @@ Keep a summary of 20 lines or fewer per area.
 - Never say a flow "never runs". Salesforce has no general last-run record. Say "inactive", "out of date" or "not changed since <date>".
 - The `workflow` check shows which Workflow Rules exist, not whether they are active. Say "exist".
 - `ApexOrgWideCoverage` can read 0% even after a test run (seen in a scratch org on 17 Oct 2026). If it is 0 while Apex classes and a completed test run exist, say coverage wasn't recorded, not that it is 0%, and suggest running all tests once.
+- In `flows`, `ProcessType = Workflow` is a Process Builder, not a Flow. Count Process Builders separately and score them under the Cut rule.
+- If a query returns 200 rows, the list was cut at 200. Say "200 or more" and use the counts query for totals.
 - No partner claims, no prices, no urgency.
 
 ## 4. Write the note
-Fill the template at `${CLAUDE_PLUGIN_ROOT}/templates/note.md`, then apply the `verdict` skill. End with: "Want this written up properly? Get the written assessment: https://mindcat.ai/contact".
+Fill the template at `${CLAUDE_PLUGIN_ROOT}/templates/note.md`, then apply the `verdict` skill. Keep the template's last line, the link to https://mindcat.ai/contact/org-stuck.
