@@ -10,7 +10,7 @@ allowed-tools: Bash(bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" *)
 **First, read `${CLAUDE_PLUGIN_ROOT}/docs/ground-rules.md` and follow every rule in it.** If you cannot read it, still keep these three:
 1. Run `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> org`, then `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> whoami`, before any other check; show the org only as "…<last 4 of the 15-character Org Id>", and if `org` fails, never guess an Id.
 2. Never run `sf org display` or `sf org open` (any form).
-3. Read the org only through that script, or the same SOQL on the hosted path (no other SOQL, no other `sf` command except `sf org list`), with only the alias the user named.
+3. Read the org only through that script, or the same SOQL on the hosted path (no other SOQL, no other `sf` command), with only the alias the user named.
 
 ## Checks
 - `licences`: user licences (total, used), permission set licences (total, used), and active users with no login in 90 days, by licence.

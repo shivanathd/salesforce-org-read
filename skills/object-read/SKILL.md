@@ -10,7 +10,7 @@ allowed-tools: Bash(bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" *)
 **First, read `${CLAUDE_PLUGIN_ROOT}/docs/ground-rules.md` and follow every rule in it.** If you cannot read it, still keep these three:
 1. Run `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> org`, then `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> whoami`, before any other check; show the org only as "…<last 4 of the 15-character Org Id>", and if `org` fails, never guess an Id.
 2. Never run `sf org display` or `sf org open` (any form).
-3. Read the org only through that script, or the same SOQL on the hosted path (no other SOQL, no other `sf` command except `sf org list`), with only the alias the user named.
+3. Read the org only through that script, or the same SOQL on the hosted path (no other SOQL, no other `sf` command), with only the alias the user named.
 
 ## Input
 The object's API name, for example `Account` or `Invoice__c`. It must contain only letters, digits and underscores (`^[A-Za-z0-9_]{1,80}$`); the script refuses anything else, and on the hosted path check the name against the same rule before building any SOQL with it. Ask the user if the name is unclear; never guess a custom object's suffix.

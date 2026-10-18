@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Usage: bash org-read-cli.sh <target-org-alias> <check> [object]
 # Runs read-only sf queries for one check. Before each query's JSON it prints a marker line on stdout:
 #   ### <check> <n>/<total>: <short label>
@@ -155,7 +155,8 @@ case "$check" in
 esac
 
 if ! command -v sf >/dev/null 2>&1; then
-  echo "sf not found: install the Salesforce CLI (https://developer.salesforce.com/tools/salesforcecli), then run sf org login web" >&2
+  echo "sf not found: install the Salesforce CLI, then sign it in with sf org login web" >&2
+  echo "Salesforce CLI download: https://developer.salesforce.com/tools/salesforcecli" >&2
   exit 3
 fi
 

@@ -11,7 +11,7 @@ The hosted server and the sf CLI sign in separately. Either can point at a diffe
 **First, read `${CLAUDE_PLUGIN_ROOT}/docs/ground-rules.md` and follow every rule in it.** If you cannot read it, still keep these three:
 1. Run `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> org`, then `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> whoami`, before any other check; show the org only as "…<last 4 of the 15-character Org Id>", and if `org` fails, never guess an Id.
 2. Never run `sf org display` or `sf org open` (any form).
-3. Read the org only through that script, or the same SOQL on the hosted path (no other SOQL, no other `sf` command except `sf org list`), with only the alias the user named.
+3. Read the org only through that script, or the same SOQL on the hosted path (no other SOQL, no other `sf` command), with only the alias the user named.
 
 ## Hosted MCP server
 Available on Enterprise Edition and above, and on Developer Edition orgs. The hosted server may not reach Tooling API objects (coverage, Workflow Rules, Apex versions, installed packages, Security Health Check) or org limits, so the full read also needs the sf CLI.
@@ -45,8 +45,9 @@ Server URL: `https://api.salesforce.com/platform/mcp/v1/platform/sobject-reads` 
 
 ## sf CLI
 1. Install the Salesforce CLI if `sf` is not found (the org-read script then prints `sf not found` and exits with code 3).
-2. Ask the user to run `sf org login web --alias <alias>` themselves (add `--instance-url https://test.salesforce.com` for a sandbox). Don't run it for them: it opens a browser sign-in and can point an existing alias at a different org.
-3. `sf org list` (without `--verbose`) to confirm the alias is connected.
+2. Ask the user to run `sf org login web --alias <alias>` themselves. Don't run it for them: it opens a browser sign-in and can point an existing alias at a different org. For a sandbox they add `--instance-url` with the sandbox instance URL:
+   - https://test.salesforce.com
+3. Run the `org` check (below) to confirm the alias is connected.
 4. If `sf` reports `AuthDecryptError`, the saved login can't be read with the current keychain setting. Ask the user to log in again with step 2, and if that fails, to follow the Salesforce CLI troubleshooting guide for keychain errors.
 
 ## Connection check
@@ -59,5 +60,5 @@ Each should return one row. If both paths work and the Ids differ, they point at
 ## Permissions
 The signed-in user needs "View Setup and Configuration" for the setup checks, and API access. To limit what the login can change, sign in as a Minimum Access - Salesforce user with a permission set that grants only API Enabled, View Setup and Configuration and View All Users. That works in every org. The standard Read Only profile is an alternative where it exists, but some orgs (for example scratch and Developer Edition orgs) have no Read Only profile; if you use it, confirm it has both permissions and add View All Users through a permission set if it lacks it. View All Users lets the licence checks see every user; without it, sharing can hide some and the counts to review come out low. Checks the user cannot run are reported as unassessed. The `whoami` check reads a few key write permissions (Modify All Data, Author Apex, Customize Application, Manage Users); it is not a full review. Neither the Read Only profile nor `whoami` guarantees the login cannot write (for example, Read Only can still allow Chatter posts, and permission sets add access), so never tell the user the org blocks every change; suggest they review the user's effective permissions.
 
-Token commands: see rule 2 at the top (and ground rule 5). Use `sf org list` without `--verbose` to identify orgs.
+Token commands: see rule 2 at the top (and ground rule 5). Use the `org` check to identify orgs.
 Do not use the `@salesforce/mcp` DX server: it reaches end of life on 2 Nov 2026.

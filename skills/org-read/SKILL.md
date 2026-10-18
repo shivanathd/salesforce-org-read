@@ -10,13 +10,13 @@ allowed-tools: Bash(bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" *)
 **First, read `${CLAUDE_PLUGIN_ROOT}/docs/ground-rules.md` and follow every rule in it.** If you cannot read it, still keep these three:
 1. Run `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> org`, then `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> whoami`, before any other check; show the org only as "…<last 4 of the 15-character Org Id>", and if `org` fails, never guess an Id.
 2. Never run `sf org display` or `sf org open` (any form).
-3. Read the org only through that script, or the same SOQL on the hosted path (no other SOQL, no other `sf` command except `sf org list`), with only the alias the user named.
+3. Read the org only through that script, or the same SOQL on the hosted path (no other SOQL, no other `sf` command), with only the alias the user named.
 
 Then pick the path and confirm the org (sections 1 and 2) before any other check.
 
 ## 1. Pick the path
 - **Hosted path**: the `salesforce-sobject-reads` MCP server is connected. Run the same SOQL the script runs for a check (`q` lines in `${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh`) through its SOQL query tool. Tooling API queries (`qt` lines: coverage, Workflow Rules, Apex versions, installed packages, Health Check) and `limits` may not run there, so a full read needs the CLI path. Before putting an object name into hosted SOQL, check it matches `^[A-Za-z0-9_]{1,80}$` (the script's rule); if it does not, stop and ask the user.
-- **CLI path**: the user's `sf` CLI is logged in to the org (`sf org list` shows it). Run each check as its own command, exactly in this form:
+- **CLI path**: the user's `sf` CLI is logged in to the org (the `org` check succeeds). Run each check as its own command, exactly in this form:
   `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> <check>`
   Before each query's JSON the script prints `### <check> <n>/<total>: <label>`. Read each result by its marker, not by position.
   Exit code 3 means `sf` is not installed (stderr says `sf not found`; use the `org-connect` skill). Exit code 4 means every query in that check failed, so its area is unassessed (read the error JSON for the reason).

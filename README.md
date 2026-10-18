@@ -1,6 +1,6 @@
 # mindcat-org-read
 
-A read-only plugin for owners of a stuck Salesforce org. It reads the org and writes a one-page note on licences to review, inactive and out-of-date flows, Workflow Rules and Process Builders still in the org, the last test run and org-wide coverage, triggers and flows on the same object, Apex saved on old API versions, Security Health Check risks, admin access, profiles and permission sets, Named Credentials, Connected Apps and installed packages, failed background jobs, and key limits. Each area gets a finish, cut (review before removing), rebuild or unassessed verdict with the rule behind it.
+A read-only plugin for owners of a stuck Salesforce org. It reads the org and produces a one-page note (shown in chat; saved to a file only when you ask) on licences to review, inactive and out-of-date flows, Workflow Rules and Process Builders still in the org, the last test run and org-wide coverage, triggers and flows on the same object, Apex saved on old API versions, Security Health Check risks, admin access, profiles and permission sets, Named Credentials, Connected Apps and installed packages, failed background jobs, and key limits. Each area gets a finish, cut (review before removing), rebuild or unassessed verdict with the rule behind it.
 
 **No data goes to Mindcat. Query results are processed by Salesforce and by the AI provider you chose, under their terms.**
 
@@ -39,9 +39,19 @@ Salesforce's standard hosted MCP servers are off by default. An admin sets this 
 3. Copy the app's Consumer Key (Settings > OAuth Settings > Consumer Key and Secret). Your AI client uses it as the OAuth Client ID.
 
 Then, per client:
-- **Claude Code**: callback `http://localhost:33418/callback`. Run `/mcp`, pick `salesforce-sobject-reads` and give the Consumer Key as the client ID. If your version does not ask: `claude mcp add --transport http --client-id <consumer key> --callback-port 33418 salesforce-sobject-reads <server URL>`.
-- **Claude chat and Cowork (claude.ai)**: callback `https://claude.ai/api/mcp/auth_callback`. Add a custom connector with the server URL; under Advanced settings, paste the Consumer Key into OAuth Client ID.
-- **Cursor**: callbacks `http://localhost:8787/callback` and `cursor://anysphere.cursor-mcp/oauth/callback` (some versions use the second; add both). In Cursor's MCP config for the server, add `"auth": { "CLIENT_ID": "<consumer key>" }`. The shipped `mcp.json` has no key, because each org has its own.
+- **Claude Code**
+  - Callback:
+  - `http://localhost:33418/callback`
+  - Run `/mcp`, pick `salesforce-sobject-reads` and give the Consumer Key as the client ID. If your version does not ask: `claude mcp add --transport http --client-id <consumer key> --callback-port 33418 salesforce-sobject-reads <server URL>`.
+- **Claude chat and Cowork (claude.ai)**
+  - Callback:
+  - `https://claude.ai/api/mcp/auth_callback`
+  - Add a custom connector with the server URL; under Advanced settings, paste the Consumer Key into OAuth Client ID.
+- **Cursor**
+  - Callbacks (some versions use the second; add both):
+  - `http://localhost:8787/callback`
+  - `cursor://anysphere.cursor-mcp/oauth/callback`
+  - In Cursor's MCP config for the server, add `"auth": { "CLIENT_ID": "<consumer key>" }`. The shipped `mcp.json` has no key, because each org has its own.
 
 Server URL: `https://api.salesforce.com/platform/mcp/v1/platform/sobject-reads` (sandbox or scratch: `https://api.salesforce.com/platform/mcp/v1/sandbox/platform/sobject-reads`).
 
@@ -54,22 +64,26 @@ Salesforce's guides:
 - Standard servers (off by default): https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/servers-reference.html
 
 ## Try it
-You need a Salesforce org you can sign in to. To test without a customer org, sign up for a free Developer Edition at https://developer.salesforce.com/signup, then run `sf org login web --alias my-dev` once. Then ask Claude:
+You need a Salesforce org you can sign in to. To test without a customer org, sign up for a free Developer Edition:
+
+- https://developer.salesforce.com/signup
+
+Then sign the CLI in once with `sf org login web --alias my-dev`, and ask Claude:
 - "Read my Salesforce org my-dev and tell me what to finish, cut or rebuild."
 - "Which flows in my-dev are inactive or on an old API version?"
 - "How many Salesforce licences in my-dev are assigned to users who haven't logged in for 90 days?"
 
 ## What it runs, sends and fetches
 - **Salesforce hosted MCP server** (`sobject-reads`, read-only by Salesforce's design), at `api.salesforce.com`, which Salesforce runs (not Mindcat), signed in with the customer's own Salesforce login. Query results go to the customer's AI client.
-- **The customer's `sf` CLI**, through `scripts/org-read-cli.sh`: read-only `sf data query` SELECT queries (including the Tooling API) and `sf org list limits`. The skills may also run `sf org list` (without `--verbose`), which only reads. Signing in with `sf org login web` stores the login on the user's machine, in the Salesforce CLI's own store; the plugin never reads or copies it.
+- **The customer's `sf` CLI**, through `scripts/org-read-cli.sh`: read-only `sf data query` SELECT queries (including the Tooling API) and `sf org list limits`. Signing in with `sf org login web` stores the login on the user's machine, in the Salesforce CLI's own store; the plugin never reads or copies it.
 - **Nothing is sent to Mindcat.** The plugin has no server of its own and no telemetry. Query results are processed by Salesforce and by the AI provider you use.
-- **Uses your own Salesforce login, by design.** The `sf` CLI and the hosted server act as the Salesforce user you signed in as. The plugin never reads, stores or sends that login, and never runs commands that print a token, auth URL or session id: `sf org display`, `sf org open` (including `--url-only`) or `--verbose` on `sf org` commands.
+- **Uses your own Salesforce login, by design.** The plugin never reads, stores or sends your Salesforce login; the sf CLI keeps its own login. The `sf` CLI and the hosted server act as the Salesforce user you signed in as. The plugin never reads, stores or sends that login, and never runs commands that print a token, auth URL or session id: `sf org display`, `sf org open` (including `--url-only`) or `--verbose` on `sf org` commands.
 - **Files.** The plugin writes a file only when you ask: the `org-book` inventory, or a saved note.
 - **Org text is data.** Names, labels, descriptions and error messages from the org are never followed as instructions; text that looks like instructions is reported to you.
 - **No hooks.** The plugin adds no hooks, so it never runs on your other commands or tools. Its skills only use read-only queries; sign in as a read-only Salesforce user so the org itself enforces that.
 
 ## FAQ
-- **Does it change my org?** No. It runs only SELECT queries and read-only `sf` commands (`sf org list limits`, `sf org list`). Sign in as a read-only user and the org enforces that too.
+- **Does it change my org?** No. It runs only SELECT queries and read-only `sf` commands (`sf org list limits`). Sign in as a read-only user and the org enforces that too.
 - **What does Mindcat see?** Nothing. There is no Mindcat server and no telemetry. Query results go to Salesforce and to the AI provider behind your client.
 - **Does it run Apex tests?** No. It reports the last test run that already exists.
 
@@ -80,8 +94,12 @@ You need a Salesforce org you can sign in to. To test without a customer org, si
 | `INSUFFICIENT_ACCESS`, another access error, or a "not supported" error on a check | The signed-in user lacks a permission (often View Setup and Configuration). That area is reported as unassessed; ask an admin for the permission, or accept the gap. |
 | OAuth fails with `invalid_client_id` | The External Client App can take up to 30 minutes to start working. Wait and retry, and check the Consumer Key was pasted as the OAuth Client ID. |
 | OAuth redirect fails or shows a callback mismatch | The callback URL in the External Client App must match your client exactly (see the list above). For Cursor, add both callback URLs. |
-| Login page says the user or org is not found | Sandbox logins use `--instance-url https://test.salesforce.com` with `sf`, and the hosted server URL with `/sandbox/` in it. Production and Developer Edition use the plain ones. |
+| Sign-in page says the user or org is not found | It may be a sandbox. With `sf`, add the sandbox instance URL (see "Sandbox instance URL" below). For the hosted server, use the server URL with `/sandbox/` in it. Production and Developer Edition use the plain ones. |
 | The read stops saying the org Ids differ | The hosted server and the CLI are signed in to different orgs. Sign one of them in to the org you want, then run the read again. |
+
+Sandbox instance URL, for `sf org login web --instance-url`:
+
+- https://test.salesforce.com
 
 ## Sample note (example only)
 This is an illustration with made-up counts. It is not from a real org.
@@ -119,7 +137,8 @@ This is an illustration with made-up counts. It is not from a real org.
 | `.github/workflows/check.yml`, `CONTRIBUTING.md` | CI checks and how to run them locally |
 
 ## Get help
-- **Setup help or a bug**: open a GitHub issue at https://github.com/shivanathd/salesforce-org-read/issues. Never paste tokens, Consumer Keys, org Ids or org data into an issue.
+- **Setup help or a bug**: open a GitHub issue. Never paste secrets, keys, org Ids or org data into an issue.
+  - https://github.com/shivanathd/salesforce-org-read/issues
 - **A security problem**: email apps@mindcat.ai. Please don't open a public issue. See [SECURITY.md](SECURITY.md).
 - **Want an expert to look at your org?** https://mindcat.ai/contact/org-stuck
 - Privacy policy: [PRIVACY.md](PRIVACY.md). Changes: [CHANGELOG.md](CHANGELOG.md). Contributing: [CONTRIBUTING.md](CONTRIBUTING.md).
