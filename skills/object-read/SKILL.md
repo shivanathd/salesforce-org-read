@@ -13,10 +13,10 @@ Follow the `org-read` skill's ground rules (section 0) and run its path choice a
 The object's API name, for example `Account` or `Invoice__c`. It must contain only letters, digits and underscores (`^[A-Za-z0-9_]{1,80}$`); the script refuses anything else, and on the hosted path check the name against the same rule before building any SOQL with it. Ask the user if the name is unclear; never guess a custom object's suffix.
 
 ## Checks
-1. `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> object <ApiName>`: the object's EntityDefinition `DurableId`, its validation rules, and the flows and Process Builders it triggers.
-2. `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> object-code <DurableId>`: Apex triggers and Workflow Rules on the object. Use the `DurableId` from step 1 (for a standard object this is usually its name, for a custom object a 15-character Id; pass it exactly as returned). If step 1 returned no row, the object name is wrong or not visible to this user: stop and say so.
+1. `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> object <ApiName>`: confirms the object exists (its EntityDefinition row), its validation rules, and the flows and Process Builders it triggers. If the first query returned no row, the object name is wrong or not visible to this user: stop and say so.
+2. `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> object-code <ApiName>`: Apex triggers (active and inactive) and Workflow Rules on the object. Pass the same object API name as in step 1 (for example `Invoice__c`), never the `DurableId`: `TableEnumOrId` holds the API name for standard and custom objects, and a custom object's Id finds nothing.
 
-These queries are not yet tested on a real org (see `docs/queries-to-test.md`). Until they are, 0 rows from any of them is **unassessed**, not zero. In particular, `object-code` compares `TableEnumOrId` with the 15-character `DurableId`; if it returns no triggers or Workflow Rules for a custom object, say "unassessed: the Id form may not match", never "none".
+Check `docs/queries-to-test.md`: a query there with no Result is untested, and 0 rows from it is **unassessed**, not zero. The `object-code` Workflow Rule query is untested on a custom object, so 0 Workflow Rules from it is "unassessed (query not yet tested)", never "none".
 
 ## Wording rules
 - Validation rules: report the count of active ones (`Active = true`) and the total. Do not print their formulas or messages.

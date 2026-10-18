@@ -5,14 +5,14 @@
 # Each query runs even if another fails (for example when the user lacks "View Setup and Configuration"),
 # and a failure prints sf's error JSON. Exit 4 when every query in the check failed; exit 3 when sf is missing
 # (then stderr says "sf not found"). Exit 2 for bad arguments.
-# The checks object, object-code and field-descriptions take a third argument: an object API name
-# (or, for object-code, the object's EntityDefinition DurableId). It must match ^[A-Za-z0-9_]{1,80}$.
+# The checks object, object-code and field-descriptions take a third argument: an object API name,
+# for example Account or Invoice__c. It must match ^[A-Za-z0-9_]{1,80}$.
 set -uo pipefail
 if ! command -v sf >/dev/null 2>&1; then
   echo "sf not found: install the Salesforce CLI (https://developer.salesforce.com/tools/salesforcecli), then run sf org login web" >&2
   exit 3
 fi
-usage="usage: bash org-read-cli.sh <org-alias> <org|whoami|licences|flows|workflow|triggers|tests|old-code|security|admins|permissions|packages|integrations|async|limits|renewal|recent-changes|flow-descriptions|class-coverage|api-45|fields|inventory> | <org-alias> <object|field-descriptions> <ObjectApiName> | <org-alias> object-code <DurableId>"
+usage="usage: bash org-read-cli.sh <org-alias> <org|whoami|licences|flows|workflow|triggers|tests|old-code|security|admins|permissions|packages|integrations|async|limits|renewal|recent-changes|flow-descriptions|class-coverage|api-45|fields|inventory> | <org-alias> <object|object-code|field-descriptions> <ObjectApiName>"
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
   echo "$usage" >&2
   exit 2
@@ -133,18 +133,20 @@ case "$check" in
     qt "your custom object count" "SELECT COUNT(Id) FROM CustomObject WHERE NamespacePrefix = null" ;;
   object)
     # One object: its EntityDefinition DurableId (EntityDefinition ignores LIMIT; the name filter returns one row),
-    # validation rules, and flows it triggers. Run object-code with the DurableId for triggers and Workflow Rules.
+    # validation rules, and flows it triggers. Run object-code with the same API name for triggers and Workflow Rules.
     qt "object DurableId" "SELECT DurableId, QualifiedApiName FROM EntityDefinition WHERE QualifiedApiName = '$obj'"
     qt "validation rules" "SELECT ValidationName, Active FROM ValidationRule WHERE EntityDefinition.QualifiedApiName = '$obj' LIMIT 200"
     q  "flows triggered by the object" "SELECT ApiName, NamespacePrefix, ProcessType, TriggerType, RecordTriggerType, TriggerOrder, IsActive FROM FlowDefinitionView WHERE TriggerObjectOrEvent.QualifiedApiName = '$obj' LIMIT 200" ;;
   object-code)
-    # TableEnumOrId holds the name for standard objects and the Id for custom ones: pass the DurableId from object.
+    # TableEnumOrId holds the object API name (Account, Invoice__c) on ApexTrigger and WorkflowRule, for standard
+    # and custom objects alike (tested on a scratch org: the custom object's Id finds nothing).
     qt "Apex triggers on the object" "SELECT Name, ApiVersion, Status FROM ApexTrigger WHERE TableEnumOrId = '$obj' LIMIT 200"
     qt "Workflow Rules on the object" "SELECT Id, Name FROM WorkflowRule WHERE TableEnumOrId = '$obj' LIMIT 200" ;;
   field-descriptions)
     # FieldDefinition ignores LIMIT and needs an object filter; one object per call.
-    # Your own fields only: package field descriptions are not the owner's text.
-    qt "your fields and their descriptions" "SELECT QualifiedApiName, Description FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '$obj' AND NamespacePrefix = null" ;;
+    # Every field on the object: a NamespacePrefix filter here matches nothing (tested), so the skills keep
+    # only names ending in __c with no other __ (the owner's own custom fields).
+    qt "fields and their descriptions" "SELECT QualifiedApiName, Description FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '$obj'" ;;
   *) echo "unknown check: $check" >&2; exit 2 ;;
 esac
 
