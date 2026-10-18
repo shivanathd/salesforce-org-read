@@ -15,7 +15,12 @@ for f in .claude-plugin/plugin.json .claude-plugin/marketplace.json .cursor-plug
 done
 ```
 
-Install shellcheck with your package manager (`brew install shellcheck`, `apt install shellcheck`) or `pip install shellcheck-py`. If you have the Claude Code CLI, also run `claude plugin validate --strict .`.
+Install shellcheck with your package manager (`brew install shellcheck`, `apt install shellcheck`) or `pip install shellcheck-py`. If you have the Claude Code CLI, also run both of these. In a folder that holds a marketplace, `claude plugin validate --strict .` checks only `marketplace.json`, so validate the plugin manifest on its own as well:
+
+```
+claude plugin validate --strict .
+claude plugin validate --strict .claude-plugin/plugin.json
+```
 
 ## Queries not yet run
 New queries go in `docs/queries-to-test.md` (check, query, standard or Tooling, what to expect) until someone has run them on a scratch org. Use only fields listed in Salesforce's Object Reference or Tooling API reference. Remember that some Tooling objects (EntityDefinition, FieldDefinition and others) ignore `LIMIT` and reject `COUNT`, `GROUP BY`, `OR` and `NOT`.

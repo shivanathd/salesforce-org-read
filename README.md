@@ -17,7 +17,7 @@ A read-only plugin for owners of a stuck Salesforce org. It reads the org and wr
 | `agent-readiness` | Access model, where logic lives, field descriptions on Account, Contact, Opportunity and Case |
 | `org-book` | A Markdown inventory file, written only when you ask |
 
-Some v0.2 queries have not yet been run on an org; see [docs/queries-to-test.md](docs/queries-to-test.md). A query that fails is reported as unassessed.
+A query not yet run on an org is listed with no Result in [docs/queries-to-test.md](docs/queries-to-test.md). A query that fails is reported as unassessed.
 
 ## Before you start
 - **Salesforce edition**: the hosted MCP server needs Enterprise Edition or above, or a Developer Edition org. The sf CLI path works on any org you can log in to with API access.
@@ -124,4 +124,4 @@ This is an illustration with made-up counts. It is not from a real org.
 - Privacy policy: [PRIVACY.md](PRIVACY.md). Changes: [CHANGELOG.md](CHANGELOG.md). Contributing: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Status
-Version 0.2.0. The first eight checks have been run against a real Salesforce scratch org, and the two `admins` breakdown queries, the custom profile count, `packages`, `integrations`, `async` and the permission set licence query against a real org. The queries listed in [docs/queries-to-test.md](docs/queries-to-test.md) have not been run yet. Test coverage can read 0% even after tests run; the note then keeps the reported value and says it may not have been recorded.
+Version 0.2.0. The first eight checks have been run against a real Salesforce scratch org, and the two `admins` breakdown queries, the custom profile count, `packages`, `integrations`, `async` and the permission set licence query against a real org. The queries in [docs/queries-to-test.md](docs/queries-to-test.md) were run on a scratch org on 2026-10-18; the one with no Result there (Workflow Rules on one object) has not been run yet. Test coverage can read 0% even after tests run; the note then keeps the reported value and says it may not have been recorded.

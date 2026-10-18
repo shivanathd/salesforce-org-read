@@ -18,6 +18,18 @@ Security hardening from a red-team review.
 - `org-book` writes no org name and warns when the folder is inside a git repository. Privacy policy updated to match.
 - "Unused licences" is now "licences to review" in the plugin descriptions.
 
+Fixes from the 2026-10-18 scratch-org QA:
+- `object-code` takes the object API name: `TableEnumOrId` holds it for custom objects too, and the DurableId found no triggers.
+- `field-descriptions` drops its `NamespacePrefix = null` filter, which matched no rows; the skills keep only `__c` names with no other `__`.
+- Every focused skill states the hard rules itself: `org` then `whoami` first, masked Id only, no `sf org display` or `sf org open`, script queries only, the named alias only and never printed.
+- agent-readiness: 0 rows from an untested query, or no field rows at all, is unassessed, not a High-confidence zero.
+- Triggers match flows on `TriggerObjectOrEvent.QualifiedApiName` for every object.
+- Permission set licences read "<used> of <total> used, to review"; the Brief says "<n> users to review"; a licence with more visible users than used is a low-confidence review item.
+- The alias counts as the org name. The note is shown, and written to a file only when asked. A failed `org` check never yields a guessed Id. Fixed wording when the four key write permissions are all false.
+- Managed flows are found by `NamespacePrefix` only. field-usage reports counts and API names, never description text. One Brief heading: "Brief you can paste".
+- Setup leads with a Minimum Access user plus a permission set; the Read Only profile may be missing in scratch and Developer Edition orgs.
+- `docs/queries-to-test.md` records the results, and notes that `IsAllTests` needs an org with two test classes to test. CONTRIBUTING validates `plugin.json` on its own.
+
 ## 0.2.0 (2026-10-17)
 - Legacy metadata versions: Apex saved on API 30 or lower is now tech debt to review, not a Rebuild reason. Salesforce's API 21 to 30 retirement affects API calls, not saved Apex. The note says integrations calling old API versions are not checked.
 - Verdict rules rewritten as Mindcat's own, with numbers. Rebuild needs two independent signals in one area; coverage under 75% alone is not enough.
