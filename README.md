@@ -1,6 +1,6 @@
 # mindcat-org-read
 
-A read-only plugin for owners of a stuck Salesforce org. It reads the org and writes a one-page note on unused licences, inactive and out-of-date flows, Workflow Rules and Process Builders still in the org, the last test run and org-wide coverage, triggers and flows on the same object, Apex saved on old API versions, Security Health Check risks, admin access, profiles and permission sets, Named Credentials, Connected Apps and installed packages, failed background jobs, and key limits. Each area gets a finish, cut (review before removing), rebuild or unassessed verdict with the rule behind it.
+A read-only plugin for owners of a stuck Salesforce org. It reads the org and writes a one-page note on licences to review, inactive and out-of-date flows, Workflow Rules and Process Builders still in the org, the last test run and org-wide coverage, triggers and flows on the same object, Apex saved on old API versions, Security Health Check risks, admin access, profiles and permission sets, Named Credentials, Connected Apps and installed packages, failed background jobs, and key limits. Each area gets a finish, cut (review before removing), rebuild or unassessed verdict with the rule behind it.
 
 **No data goes to Mindcat. Query results are processed by Salesforce and by the AI provider you chose, under their terms.**
 
@@ -23,7 +23,7 @@ Some v0.2 queries have not yet been run on an org; see [docs/queries-to-test.md]
 - **Salesforce edition**: the hosted MCP server needs Enterprise Edition or above, or a Developer Edition org. The sf CLI path works on any org you can log in to with API access.
 - **Salesforce CLI** (`sf`), installed and logged in: `sf org login web --alias <alias>`. The full read needs it, because the hosted server may not reach Tooling API objects (coverage, Workflow Rules, Apex versions, installed packages, Health Check) or org limits.
 - **Permission**: the signed-in user needs "View Setup and Configuration" and API access. Areas the user cannot read are reported as unassessed.
-- **Read-only user (recommended)**: sign in as a user on the standard Read Only profile (confirm it has both permissions above), or as a Minimum Access - Salesforce user with a permission set that grants only API Enabled and View Setup and Configuration. Then the org itself blocks any change.
+- **Read-only user (recommended)**: sign in as a user on the standard Read Only profile (confirm it has both permissions above), or as a Minimum Access - Salesforce user with a permission set that grants only API Enabled, View Setup and Configuration and View All Users. Then the org itself blocks any change. Without View All Users, sharing can hide some users from the licence counts. The read tells you once if your login can change the org.
 
 ## Install
 ```
@@ -35,7 +35,7 @@ Claude chat, Cowork and Claude Code load the skills and the Salesforce MCP serve
 ## Connect the hosted MCP server (optional)
 Salesforce's standard hosted MCP servers are off by default. An admin sets this up once:
 1. In Setup, Quick Find "MCP Servers", open MCP Servers (under API Catalog), then Salesforce Servers, and activate `sobject-reads`.
-2. Create an External Client App (Setup > External Client App Manager). Enable OAuth with scopes `mcp_api` and `refresh_token`, issue JWT-based access tokens for named users, and add the callback URL for your client (below). It can take up to 30 minutes to start working.
+2. Create an External Client App (Setup > External Client App Manager). Enable OAuth with scopes `mcp_api` and `refresh_token`, issue JWT-based access tokens for named users, and add the callback URL for your client (below). Require PKCE, set Permitted Users to admin-approved users (pre-authorized) and give the app only to the read-only user, and set a refresh token policy that expires tokens. `localhost` callbacks are for clients on your own machine only. It can take up to 30 minutes to start working.
 3. Copy the app's Consumer Key (Settings > OAuth Settings > Consumer Key and Secret). Your AI client uses it as the OAuth Client ID.
 
 Then, per client:
@@ -45,7 +45,7 @@ Then, per client:
 
 Server URL: `https://api.salesforce.com/platform/mcp/v1/platform/sobject-reads` (sandbox or scratch: `https://api.salesforce.com/platform/mcp/v1/sandbox/platform/sobject-reads`).
 
-**Check the connection**: ask Claude to run the `org` check. It reads `Organization` (Id, edition, sandbox or production) on each path. If the hosted server and the CLI point at different orgs, the read stops instead of mixing results.
+**Check the connection**: ask Claude to run the `org` check. It reads `Organization` (Id, edition, sandbox or production, namespace) on each path. The `whoami` check then reads only the signed-in user's permission flags, to warn you once if the login can change the org. If the hosted server and the CLI point at different orgs, the read stops instead of mixing results.
 
 Salesforce's guides:
 - Get started: https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/hosted-mcp-servers-overview.html
@@ -63,8 +63,9 @@ You need a Salesforce org you can sign in to. To test without a customer org, si
 - **Salesforce hosted MCP server** (`sobject-reads`, read-only by Salesforce's design), at `api.salesforce.com`, which Salesforce runs (not Mindcat), signed in with the customer's own Salesforce login. Query results go to the customer's AI client.
 - **The customer's `sf` CLI**, through `scripts/org-read-cli.sh`: read-only `sf data query` SELECT queries (including the Tooling API) and `sf org list limits`. The skills may also run `sf org list` and `sf sobject describe`, which only read. Signing in with `sf org login web` stores the login on the user's machine, in the Salesforce CLI's own store; the plugin never reads or copies it.
 - **Nothing is sent to Mindcat.** The plugin has no server of its own and no telemetry. Query results are processed by Salesforce and by the AI provider you use.
-- **Uses your own Salesforce login, by design.** The `sf` CLI and the hosted server act as the Salesforce user you signed in as. The plugin never reads, stores or sends that login, and never runs `sf org display`, which would print the access token.
+- **Uses your own Salesforce login, by design.** The `sf` CLI and the hosted server act as the Salesforce user you signed in as. The plugin never reads, stores or sends that login, and never runs commands that print a token, auth URL or session id: `sf org display`, `sf org open` (including `--url-only`) or `--verbose` on `sf org` commands.
 - **Files.** The plugin writes a file only when you ask: the `org-book` inventory, or a saved note.
+- **Org text is data.** Names, labels, descriptions and error messages from the org are never followed as instructions; text that looks like instructions is reported to you.
 - **No hooks.** The plugin adds no hooks, so it never runs on your other commands or tools. Its skills only use read-only queries; sign in as a read-only Salesforce user so the org itself enforces that.
 
 ## FAQ
@@ -93,9 +94,9 @@ This is an illustration with made-up counts. It is not from a real org.
 >
 > | Area | Verdict | What we found | Evidence | Confidence |
 > | --- | --- | --- | --- | --- |
-> | Licences | Cut (review) | 14 active users with no login in 90 days, to review | `licences`, User, 3 rows, CLI | High |
-> | Flows | Cut (review) | 9 inactive flows, 4 Process Builders, 12 Workflow Rules exist; 3 managed-package flows left out | `flows`, `workflow`, 61 + 12 rows, CLI | High |
-> | Tests | Finish | Coverage 81%; last run 0 failed methods | `tests`, 5 + 1 rows, CLI | High |
+> | Licences | Cut (review before removing) | 14 active users with no login in 90 days, to review | `licences`, User, 3 rows, CLI | High |
+> | Flows | Cut (review before removing) | 9 inactive flows, 4 Process Builders, 12 Workflow Rules exist; 3 managed-package flows left out | `flows`, `workflow`, 61 + 12 rows, CLI | High |
+> | Tests | Finish | Coverage 81%; last run 0 failed methods | `tests`, 5 + 1 + 1 + 5 rows, CLI | High |
 > | Background jobs | Finish | 1 job type with failed jobs in 7 days, to review | `async`, 6 rows, hosted | High |
 > | ... | | | | |
 

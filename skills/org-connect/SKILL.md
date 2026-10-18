@@ -19,7 +19,7 @@ An admin does these once in the org:
    Also set:
    - Require PKCE.
    - Permitted Users: "Admin approved users are pre-authorized", then give the app only to the read-only user, through a permission set.
-   - A refresh token policy that expires tokens, for example after a set number of days unused.
+   - A refresh token policy that expires tokens, for example after a set number of days without use.
    - `localhost` callbacks are only for clients on the user's own machine (Claude Code, Cursor). claude.ai uses its own https callback.
 3. Copy the Consumer Key: open the app's Settings, then OAuth Settings > Consumer Key and Secret. The Consumer Key is the OAuth Client ID the AI client asks for. Treat it like a setting, not a password, but don't paste it into a public issue.
 4. Tell the admin that Salesforce may meter hosted MCP use; check the org's current terms before heavy use.

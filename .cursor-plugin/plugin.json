@@ -1,7 +1,7 @@
 {
   "name": "mindcat-org-read",
   "version": "0.2.0",
-  "description": "Read-only Salesforce org read. Writes a one-page note on unused licences, stale flows, failing tests and risky automation, with a finish, cut or rebuild verdict per area.",
+  "description": "Read-only Salesforce org read. Writes a one-page note on licences to review, stale flows, failing tests and risky automation, with a finish, cut or rebuild verdict per area.",
   "author": {
     "name": "Mindcat",
     "email": "apps@mindcat.ai"
