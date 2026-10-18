@@ -4,7 +4,7 @@ These queries were added for the v0.2 skills and for review fixes. They use only
 
 Until a query has a Result here, the skills treat 0 rows from it as **unassessed**, not as zero: an empty result may mean the query or its filter does not work as written.
 
-The script prints a marker line before each query's JSON: `### <check> <n>/<total>: <label>`. The queries below are listed in that order within each check.
+The script prints a marker line before each query's JSON: `### <check> <n>/<total>: <label>`.
 
 Run a check with `bash scripts/org-read-cli.sh <alias> <check> [object]`, or a single query with `sf data query --target-org <alias> --json [--use-tooling-api] --query "<query>"`.
 
