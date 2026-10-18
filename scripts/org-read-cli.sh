@@ -3,7 +3,7 @@
 # Runs read-only sf queries for one check. Before each query's JSON it prints a marker line on stdout:
 #   ### <check> <n>/<total>: <short label>
 # Each query runs even if another fails (for example when the user lacks "View Setup and Configuration"),
-# and a failure prints sf's error JSON. Exit 3 when every query in the check failed, or when sf is missing
+# and a failure prints sf's error JSON. Exit 4 when every query in the check failed; exit 3 when sf is missing
 # (then stderr says "sf not found"). Exit 2 for bad arguments.
 # The checks object, object-code and field-descriptions take a third argument: an object API name
 # (or, for object-code, the object's EntityDefinition DurableId). It must match ^[A-Za-z0-9_]+$.
