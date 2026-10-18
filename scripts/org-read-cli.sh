@@ -4,23 +4,19 @@
 #   ### <check> <n>/<total>: <short label>
 # Each query runs even if another fails (for example when the user lacks "View Setup and Configuration"),
 # and a failure prints sf's error JSON. Exit 4 when every query in the check failed; exit 3 when sf is missing
-# (then stderr says "sf not found"). Exit 2 for bad arguments.
+# (then stderr says "sf not found"). Exit 2 for bad arguments, checked before looking for sf.
 # The checks object, object-code and field-descriptions take a third argument: an object API name,
 # for example Account or Invoice__c. It must match ^[A-Za-z0-9_]{1,80}$.
 set -uo pipefail
-if ! command -v sf >/dev/null 2>&1; then
-  echo "sf not found: install the Salesforce CLI (https://developer.salesforce.com/tools/salesforcecli), then run sf org login web" >&2
-  exit 3
-fi
 usage="usage: bash org-read-cli.sh <org-alias> <org|whoami|licences|flows|workflow|triggers|tests|old-code|security|admins|permissions|packages|integrations|async|limits|renewal|recent-changes|flow-descriptions|class-coverage|api-45|fields|inventory> | <org-alias> <object|object-code|field-descriptions> <ObjectApiName>"
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
   echo "$usage" >&2
   exit 2
 fi
 org="$1"; check="$2"; obj="${3:-}"
-# An alias or username: letters, digits and . _ @ - only, not starting with -, at most 80 characters.
-if ! [[ "$org" =~ ^[A-Za-z0-9_.@][A-Za-z0-9_.@-]{0,79}$ ]]; then
-  echo "the org alias may hold only letters, digits and . _ @ - (at most 80 characters, not starting with -)" >&2
+# An alias or username: letters, digits and . _ @ + - only, not starting with -, at most 80 characters.
+if ! [[ "$org" =~ ^[A-Za-z0-9_.@+][A-Za-z0-9_.@+-]{0,79}$ ]]; then
+  echo "the org alias may hold only letters, digits and . _ @ + - (at most 80 characters, not starting with -)" >&2
   exit 2
 fi
 case "$check" in
@@ -73,7 +69,9 @@ case "$check" in
     # Whether the org has Apex of its own, so an org with none is not scored on coverage.
     q  "your Apex class count" "SELECT COUNT(Id) FROM ApexClass WHERE NamespacePrefix = null"
     # Which of the last 5 runs ran all tests. Kept apart so the tested query above still runs if this one fails.
-    q  "last 5 test runs: all tests or some" "SELECT AsyncApexJobId, IsAllTests, ClassesEnqueued, Source FROM ApexTestRunResult ORDER BY StartTime DESC LIMIT 5" ;;
+    q  "last 5 test runs: all tests or some" "SELECT AsyncApexJobId, IsAllTests, ClassesEnqueued, Source FROM ApexTestRunResult ORDER BY StartTime DESC LIMIT 5"
+    # Triggers need tests too: "no Apex to test" needs 0 classes and 0 triggers.
+    q  "your Apex trigger count" "SELECT COUNT(Id) FROM ApexTrigger WHERE NamespacePrefix = null" ;;
   old-code)
     # Legacy metadata versions: Apex saved on API 30 or lower. Salesforce's retirement of API versions
     # 21 to 30 (Summer '25) affects API calls made on those versions, not Apex saved at them, so this
@@ -115,8 +113,9 @@ case "$check" in
   flow-descriptions)
     q "your flows with no description" "SELECT ApiName, NamespacePrefix, ProcessType, IsActive FROM FlowDefinitionView WHERE NamespacePrefix = null AND Description = null ORDER BY ApiName LIMIT 200" ;;
   class-coverage)
-    # Per class or trigger coverage from the last test runs, plus Ids and names to read it by.
-    qt "coverage per class or trigger" "SELECT ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered FROM ApexCodeCoverageAggregate LIMIT 500"
+    # Per class or trigger coverage from the last test runs, plus Ids and names to read it by. Most uncovered
+    # lines first, so if the 500-row cap is hit the rows read are the least covered ones.
+    qt "coverage per class or trigger, most uncovered lines first" "SELECT ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered FROM ApexCodeCoverageAggregate ORDER BY NumLinesUncovered DESC LIMIT 500"
     q  "your Apex class Ids and names" "SELECT Id, Name FROM ApexClass WHERE NamespacePrefix = null ORDER BY Name LIMIT 500"
     q  "your Apex trigger Ids and names" "SELECT Id, Name FROM ApexTrigger WHERE NamespacePrefix = null ORDER BY Name LIMIT 500" ;;
   api-45)
@@ -124,13 +123,17 @@ case "$check" in
     qt "your Apex classes below API 45" "SELECT Name, ApiVersion FROM ApexClass WHERE NamespacePrefix = null AND ApiVersion < 45 ORDER BY ApiVersion LIMIT 200"
     qt "your Apex triggers below API 45" "SELECT Name, ApiVersion FROM ApexTrigger WHERE NamespacePrefix = null AND ApiVersion < 45 ORDER BY ApiVersion LIMIT 200" ;;
   fields)
-    # Custom fields per object. Custom objects show as Ids; the second query maps them to names.
-    qt "your custom fields per object" "SELECT TableEnumOrId, COUNT(Id) FROM CustomField WHERE NamespacePrefix = null GROUP BY TableEnumOrId LIMIT 200"
-    qt "your custom object Ids and names" "SELECT Id, DeveloperName FROM CustomObject WHERE NamespacePrefix = null ORDER BY DeveloperName LIMIT 500" ;;
+    # Custom fields per object. Custom objects show as 18-character Ids; the second query maps the first 15
+    # characters to the API name with its suffix (__c, __mdt, __e, ...) and flags custom settings.
+    # EntityDefinition ignores LIMIT and its NamespacePrefix = null filter matches nothing, so it has neither.
+    qt "your custom fields per object" "SELECT TableEnumOrId, COUNT(Id) FROM CustomField WHERE NamespacePrefix = null GROUP BY TableEnumOrId LIMIT 500"
+    qt "custom object Ids and API names" "SELECT DurableId, QualifiedApiName, IsCustomSetting FROM EntityDefinition WHERE DurableId LIKE '01I%' AND IsCustomizable = true" ;;
   inventory)
     q  "your Apex class count" "SELECT COUNT(Id) FROM ApexClass WHERE NamespacePrefix = null"
     q  "your Apex trigger count" "SELECT COUNT(Id) FROM ApexTrigger WHERE NamespacePrefix = null"
-    qt "your custom object count" "SELECT COUNT(Id) FROM CustomObject WHERE NamespacePrefix = null" ;;
+    # Custom objects only (not custom settings, metadata types, platform events, big or external objects).
+    # EntityDefinition has no COUNT: count the rows whose name ends in __c with no other __ (others are managed).
+    qt "custom objects (count the rows)" "SELECT DurableId, QualifiedApiName FROM EntityDefinition WHERE DurableId LIKE '01I%' AND IsCustomSetting = false AND QualifiedApiName LIKE '%c'" ;;
   object)
     # One object: its EntityDefinition DurableId (EntityDefinition ignores LIMIT; the name filter returns one row),
     # validation rules, and flows it triggers. Run object-code with the same API name for triggers and Workflow Rules.
@@ -149,6 +152,11 @@ case "$check" in
     qt "fields and their descriptions" "SELECT QualifiedApiName, Description FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '$obj'" ;;
   *) echo "unknown check: $check" >&2; exit 2 ;;
 esac
+
+if ! command -v sf >/dev/null 2>&1; then
+  echo "sf not found: install the Salesforce CLI (https://developer.salesforce.com/tools/salesforcecli), then run sf org login web" >&2
+  exit 3
+fi
 
 total=${#queries[@]}
 failed=0
