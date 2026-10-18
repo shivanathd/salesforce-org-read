@@ -16,7 +16,7 @@ allowed-tools: Bash(bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" *)
 Only when the user asks for an org book, inventory or export file. Never write a file otherwise. Ask where to save it if they have not said; default to `org-book-<YYYY-MM-DD>.md` in the current folder. If the folder is inside a git repository (it or a parent folder has a `.git` folder or a `.git` file, as linked worktrees do), warn the user before writing that the file could get committed, and offer a folder outside the repo. Tell the user the path after writing it. If a file with that name exists, ask before overwriting.
 
 ## Checks
-- `inventory`: counts of Apex classes and Apex triggers, and the custom object list. Count custom objects as the rows of the `custom objects (count the rows)` result whose API name ends in `__c` with no other `__` (it already leaves out custom settings, metadata types, platform events, big and external objects). Its source ignores `LIMIT`, so the count is exact.
+- `inventory`: counts of Apex classes and Apex triggers, and the custom object list. Count custom objects as the rows of the `custom objects (count the rows)` result whose API name ends in `__c` and has no other `__` or starts with the org's own namespace from the `org` check (it already leaves out custom settings, metadata types, platform events, big and external objects). Its source ignores `LIMIT`, so the count is exact.
 - `fields`: custom fields per object (match Ids as the `field-usage` skill says).
 - `flows`, `workflow`: flows by type, Process Builders, Workflow Rules (ground rule 16).
 - `packages`: installed packages (name, version).

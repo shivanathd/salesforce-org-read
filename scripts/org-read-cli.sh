@@ -149,7 +149,7 @@ case "$check" in
   field-descriptions)
     # FieldDefinition ignores LIMIT and needs an object filter; one object per call.
     # Every field on the object: a NamespacePrefix filter here matches nothing (tested), so the skills keep
-    # only names ending in __c with no other __ (the owner's own custom fields).
+    # names ending in __c with no other __, or prefixed with the org's own namespace (the owner's custom fields).
     qt "fields and their descriptions" "SELECT QualifiedApiName, Description FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '$obj'" ;;
   *) echo "unknown check: $check" >&2; exit 2 ;;
 esac
