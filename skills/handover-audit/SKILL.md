@@ -21,7 +21,7 @@ Run each as `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> <check
 
 ## Wording rules
 - "Last modified by" is the last person to save the item, not its author or the only person who touched it. Report counts per person in the owner's output only; the "Brief you can paste" gives totals, no names.
-- Managed-package flows: the `recent-changes` and `flow-descriptions` queries already leave them out (`NamespacePrefix = null`). Say so; leave out any that still show a namespace.
+- Managed-package flows: the `recent-changes` and `flow-descriptions` queries already leave them out (`NamespacePrefix = null`). Say so.
 - Coverage per class: covered / (covered + uncovered). Report classes and triggers under 75% (our line for this list). A class with 0 covered and 0 uncovered lines has no coverage recorded: say "not recorded", not 0%. Coverage comes from the last test runs in the org; this skill never runs tests.
 - Match `ApexClassOrTriggerId` to the Id and name lists. If an Id is in neither list (for example a managed class), leave it out and count how many were left out. If a name list returned 500 rows, unmatched Ids may be your own: say so instead of calling them managed.
 - Caps: each of the three lists stops at 500 rows. The coverage list comes most uncovered lines first, so if it returned 500 rows it holds the 500 least covered items: say "at least <n> under 75%; only the 500 least covered were read", never a total.

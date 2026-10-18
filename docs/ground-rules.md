@@ -26,3 +26,7 @@ Every skill in this plugin reads this file first and follows every rule in it. A
 ## Output
 14. **Shareable output** (the "Brief you can paste", anything "to paste" or "to share") holds counts and verdicts only: no org name or alias, no user names, no record data. The owner's own output may name metadata (classes, flows, objects), never record data. Every skill heads its shareable block "Brief you can paste".
 15. No prices, no partner claims, no urgency.
+
+## Shared wording
+16. **Process Builders and Workflow Rules.** In flow results, `ProcessType` `Workflow`, `CustomEvent` and `InvocableProcess` are Process Builders, not Flows: count them separately from Flows and from Workflow Rules. The Workflow Rule queries show which rules exist, not whether they are active: say "exist".
+17. **Licences.** Users with no recent login are "to review": integration or API-only users, frozen users and people on leave can show there. Never write "unused", "unused seats", "unused allocation", "nobody uses" or "wasted". Count users from the result rows (`expr0`) exactly; the Brief says "<n> users to review", not licences. Free licences (Chatter Free, Chatter External, Guest User) are not paid seats: list them separately and leave them out of any count to review. Permission set licences: "<used> of <total> used, to review" (for example "0 of 25 used, to review"), information only, never a Cut candidate or a seat to drop: Salesforce provisions many automatically, often with 0 used.

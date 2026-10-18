@@ -24,9 +24,8 @@ Check `${CLAUDE_PLUGIN_ROOT}/docs/queries-to-test.md`: a query there with no Res
 ## Wording rules
 - Validation rules: report the count of active ones (`Active = true`) and the total. Do not print their formulas or messages.
 - Record-triggered flows: list each with `TriggerType`, `RecordTriggerType` and `TriggerOrder`. Two flows with the same `TriggerOrder` and trigger type are a review item: "check the run order". Gaps in the numbers are normal. Leave managed-package flows out, and say how many.
-- Process Builders: they do not fill `TriggerObjectOrEvent`, so the `object` check cannot find them by object. Mark Process Builders on this object **unassessed** ("Process Builders cannot be listed by object"), never "0" or "none". If the user wants context, run the `flows` check and give the org-wide count of Process Builders (`ProcessType` `Workflow`, `CustomEvent` or `InvocableProcess`), saying it is org-wide, not for this object. Any Process Builder rows the `object` check does return are still listed.
+- Process Builders: they do not fill `TriggerObjectOrEvent`, so the `object` check cannot find them by object. Mark Process Builders on this object **unassessed** ("Process Builders cannot be listed by object"), never "0" or "none". If the user wants context, run the `flows` check and give the org-wide count of Process Builders (ground rule 16), saying it is org-wide, not for this object. Any Process Builder rows the `object` check does return are still listed.
 - Apex triggers: count active ones (`Status` `Active`) and list inactive ones separately. Two or more active triggers on the object, or active triggers and active record-triggered flows together, are review items, not proof of overlap.
-- Workflow Rules: say "exist", not "active".
 
 ## Output
 | Automation | Count | Detail | Evidence | Confidence |

@@ -35,13 +35,17 @@ esac
 kinds=(); labels=(); queries=()
 q()  { kinds+=(q); labels+=("$1"); queries+=("$2"); }
 qt() { kinds+=(t); labels+=("$1"); queries+=("$2"); }
+# Your own Apex class and trigger counts (used by tests and inventory).
+apex_counts() {
+  q "your Apex class count" "SELECT COUNT(Id) FROM ApexClass WHERE NamespacePrefix = null"
+  q "your Apex trigger count" "SELECT COUNT(Id) FROM ApexTrigger WHERE NamespacePrefix = null"
+}
 
 case "$check" in
   org)
-    # Which org this login points at. Compare the Id with the hosted path before combining results.
-    q "org identity" "SELECT Id, Name, OrganizationType, IsSandbox FROM Organization"
-    # Set when the org has its own namespace; then the owner's code carries it and NamespacePrefix = null misses it.
-    q "org namespace" "SELECT NamespacePrefix FROM Organization" ;;
+    # Which org this login points at (compare the Id with the hosted path before combining results), and its
+    # namespace: when set, the owner's code carries it and NamespacePrefix = null misses it.
+    q "org identity and namespace" "SELECT Id, Name, OrganizationType, IsSandbox, NamespacePrefix FROM Organization" ;;
   whoami)
     # The signed-in user's own permissions, as booleans only (no name, no email).
     q "signed-in user permissions" "SELECT PermissionsModifyAllData, PermissionsAuthorApex, PermissionsCustomizeApplication, PermissionsManageUsers, PermissionsViewSetup, PermissionsViewAllUsers FROM UserPermissionAccess" ;;
@@ -66,12 +70,10 @@ case "$check" in
   tests)
     q  "last 5 test runs" "SELECT Id, AsyncApexJobId, Status, StartTime, MethodsCompleted, MethodsFailed FROM ApexTestRunResult ORDER BY StartTime DESC LIMIT 5"
     qt "org-wide coverage" "SELECT PercentCovered FROM ApexOrgWideCoverage"
-    # Whether the org has Apex of its own, so an org with none is not scored on coverage.
-    q  "your Apex class count" "SELECT COUNT(Id) FROM ApexClass WHERE NamespacePrefix = null"
     # Which of the last 5 runs ran all tests. Kept apart so the tested query above still runs if this one fails.
     q  "last 5 test runs: all tests or some" "SELECT AsyncApexJobId, IsAllTests, ClassesEnqueued, Source FROM ApexTestRunResult ORDER BY StartTime DESC LIMIT 5"
-    # Triggers need tests too: "no Apex to test" needs 0 classes and 0 triggers.
-    q  "your Apex trigger count" "SELECT COUNT(Id) FROM ApexTrigger WHERE NamespacePrefix = null" ;;
+    # Whether the org has Apex of its own: "no Apex to test" needs 0 classes and 0 triggers.
+    apex_counts ;;
   old-code)
     # Legacy metadata versions: Apex saved on API 30 or lower. Salesforce's retirement of API versions
     # 21 to 30 (Summer '25) affects API calls made on those versions, not Apex saved at them, so this
@@ -109,9 +111,9 @@ case "$check" in
     # Your own Apex and flows changed in the last 90 days, counted by who changed them.
     q "your Apex classes changed in 90 days, by person" "SELECT LastModifiedBy.Name, COUNT(Id) FROM ApexClass WHERE NamespacePrefix = null AND LastModifiedDate = LAST_N_DAYS:90 GROUP BY LastModifiedBy.Name"
     q "your Apex triggers changed in 90 days, by person" "SELECT LastModifiedBy.Name, COUNT(Id) FROM ApexTrigger WHERE NamespacePrefix = null AND LastModifiedDate = LAST_N_DAYS:90 GROUP BY LastModifiedBy.Name"
-    q "your flows changed in 90 days" "SELECT ApiName, NamespacePrefix, LastModifiedBy, LastModifiedDate FROM FlowDefinitionView WHERE NamespacePrefix = null AND LastModifiedDate = LAST_N_DAYS:90 ORDER BY LastModifiedDate DESC LIMIT 200" ;;
+    q "your flows changed in 90 days" "SELECT ApiName, LastModifiedBy, LastModifiedDate FROM FlowDefinitionView WHERE NamespacePrefix = null AND LastModifiedDate = LAST_N_DAYS:90 ORDER BY LastModifiedDate DESC LIMIT 200" ;;
   flow-descriptions)
-    q "your flows with no description" "SELECT ApiName, NamespacePrefix, ProcessType, IsActive FROM FlowDefinitionView WHERE NamespacePrefix = null AND Description = null ORDER BY ApiName LIMIT 200" ;;
+    q "your flows with no description" "SELECT ApiName, ProcessType, IsActive FROM FlowDefinitionView WHERE NamespacePrefix = null AND Description = null ORDER BY ApiName LIMIT 200" ;;
   class-coverage)
     # Per class or trigger coverage from the last test runs, plus Ids and names to read it by. Most uncovered
     # lines first, so if the 500-row cap is hit the rows read are the least covered ones.
@@ -129,8 +131,7 @@ case "$check" in
     qt "your custom fields per object" "SELECT TableEnumOrId, COUNT(Id) FROM CustomField WHERE NamespacePrefix = null GROUP BY TableEnumOrId LIMIT 500"
     qt "custom object Ids and API names" "SELECT DurableId, QualifiedApiName, IsCustomSetting FROM EntityDefinition WHERE DurableId LIKE '01I%' AND IsCustomizable = true" ;;
   inventory)
-    q  "your Apex class count" "SELECT COUNT(Id) FROM ApexClass WHERE NamespacePrefix = null"
-    q  "your Apex trigger count" "SELECT COUNT(Id) FROM ApexTrigger WHERE NamespacePrefix = null"
+    apex_counts
     # Custom objects only (not custom settings, metadata types, platform events, big or external objects).
     # EntityDefinition has no COUNT: count the rows whose name ends in __c with no other __ (others are managed).
     qt "custom objects (count the rows)" "SELECT DurableId, QualifiedApiName FROM EntityDefinition WHERE DurableId LIKE '01I%' AND IsCustomSetting = false AND QualifiedApiName LIKE '%c'" ;;
@@ -163,11 +164,12 @@ failed=0
 for i in "${!queries[@]}"; do
   echo "### $check $((i + 1))/$total: ${labels[$i]}"
   # A failed query prints sf's error JSON and never stops the queries after it.
-  case "${kinds[$i]}" in
-    q)      sf data query --target-org "$org" --json --query "${queries[$i]}" || failed=$((failed + 1)) ;;
-    t)      sf data query --target-org "$org" --json --use-tooling-api --query "${queries[$i]}" || failed=$((failed + 1)) ;;
-    limits) sf org list limits --target-org "$org" --json || failed=$((failed + 1)) ;;
-  esac
+  if [ "${kinds[$i]}" = limits ]; then
+    sf org list limits --target-org "$org" --json || failed=$((failed + 1))
+  else
+    tooling=(); [ "${kinds[$i]}" = t ] && tooling=(--use-tooling-api)
+    sf data query --target-org "$org" --json ${tooling[@]+"${tooling[@]}"} --query "${queries[$i]}" || failed=$((failed + 1))
+  fi
 done
 if [ "$failed" -eq "$total" ]; then
   echo "every query in $check failed: see the error JSON above" >&2

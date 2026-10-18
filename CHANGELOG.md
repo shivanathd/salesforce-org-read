@@ -40,6 +40,11 @@ Fixes from code review of PR #1:
 - object-read marks Process Builders on one object unassessed (they cannot be listed by object).
 - Skills use `${CLAUDE_PLUGIN_ROOT}` paths for the script and docs.
 
+Simplify:
+- `org` runs one Organization query (identity and namespace); release-readiness counts API 30 or lower from `api-45` instead of running `old-code`.
+- Process Builder, Workflow Rule and licence wording live once in `docs/ground-rules.md` (rules 16 and 17); org-connect carries the 3-rule core.
+- Script: one `apex_counts` helper for `tests` and `inventory`, one `sf data query` call, no redundant `NamespacePrefix` selects. Skills cite results by marker label, not position.
+
 ## 0.2.0 (2026-10-17)
 - Legacy metadata versions: Apex saved on API 30 or lower is now tech debt to review, not a Rebuild reason. Salesforce's API 21 to 30 retirement affects API calls, not saved Apex. The note says integrations calling old API versions are not checked.
 - Verdict rules rewritten as Mindcat's own, with numbers. Rebuild needs two independent signals in one area; coverage under 75% alone is not enough.

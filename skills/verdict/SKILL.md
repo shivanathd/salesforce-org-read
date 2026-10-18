@@ -17,7 +17,7 @@ Give each area the first outcome that applies, in this order:
 - **Finish**: anything else. The area works; list its findings, including a single Rebuild signal, as items to review. An area cannot score Finish if a list it is scored on hit its `LIMIT`: then it is unassessed, or scored at medium confidence on what the rows already show (see the `org-read` skill, section 4).
 
 ## Cut candidates (each needs a dependency check and a business-owner yes)
-- Licences: active users on paid user licences (not Chatter Free, Chatter External or Guest User) with no login in 90 days, "to review" (some may be integration, API-only or frozen users). Only these make a Licences Cut candidate. Permission set licences are never a Cut candidate: Salesforce provisions many automatically, often with 0 used, so report them as "<used> of <total> used, to review" information only.
+- Licences: active users on paid user licences (not Chatter Free, Chatter External or Guest User) with no login in 90 days, "to review" (some may be integration, API-only or frozen users). Only these make a Licences Cut candidate; permission set licences never do (ground rule 17).
 - Flows: inactive flows you own (leave out managed-package flows); Workflow Rules that exist; Process Builders. Salesforce ended support for Workflow Rules and Process Builder on 31 Dec 2025, so these are migration candidates.
 - Risky automation: an object with both active Apex triggers and active, non-managed record-triggered flows. That does not prove they overlap; it means someone should read both.
 

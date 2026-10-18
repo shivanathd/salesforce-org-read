@@ -13,16 +13,15 @@ allowed-tools: Bash(bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" *)
 3. Read the org only through that script, or the same SOQL on the hosted path (no other SOQL, no other `sf` command except `sf org list`), with only the alias the user named.
 
 ## Checks
-- `api-45`: Apex classes and triggers below API version 45.
-- `old-code`: Apex classes and triggers on API version 30 or lower.
-- `flows` and `workflow`: Process Builders (ProcessType `Workflow`, `CustomEvent`, `InvocableProcess`) and Workflow Rules that exist.
+- `api-45`: Apex classes and triggers below API version 45. Count the ones on API 30 or lower from the same rows (`ApiVersion` 30 or less); no separate check is needed.
+- `flows` and `workflow`: Process Builders and Workflow Rules that exist (ground rule 16).
 
 Run each as `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> <check>`.
 
 ## Wording rules
 - ICU locale formats: per Salesforce Help ("Enable ICU Locale Formats"), Apex classes and triggers must be on API version 45.0 or later to use ICU formats; below 45 they keep JDK formats even when ICU is on, so dates and numbers they format can differ from the standard UI. Salesforce does not enforce the change at this time. Each class or trigger below 45 is a **review item**, not a defect. Whether the org already uses ICU is shown in Setup > Company Information (Locale Formats); this skill does not read it, so say "check Company Information".
 - API 30 or lower: tech debt to review, as in the `org-read` skill. Saved Apex keeps working; integrations calling old API versions are not checked.
-- Workflow Rules and Process Builders: Salesforce ended support for them on 31 Dec 2025. They are migration candidates, counted separately. That they exist does not show whether they run.
+- Workflow Rules and Process Builders: Salesforce ended support for them on 31 Dec 2025. They are migration candidates. That they exist does not show whether they run.
 
 ## Output
 | Item | Count | Evidence | Confidence |
