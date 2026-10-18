@@ -11,7 +11,7 @@ Follow the `org-read` skill's ground rules (section 0) and run its path choice a
 
 ## Checks
 - `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> fields`: custom fields per object (your own, not managed-package fields), plus custom object Ids and names to read the result by.
-- `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> field-descriptions <ApiName>`: each field on one object that is not from a package, and its description. On the hosted path, check the object name matches `^[A-Za-z0-9_]+$` before building SOQL with it; if not, ask the user. Run it for at most 5 objects: the ones the user names, or else the 5 with the most custom fields.
+- `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> field-descriptions <ApiName>`: each field on one object that is not from a package, and its description. On the hosted path, check the object name matches `^[A-Za-z0-9_]{1,80}$` before building SOQL with it; if not, ask the user. Run it for at most 5 objects: the ones the user names, or else the 5 with the most custom fields.
 
 ## Wording rules
 - This skill counts fields. It never reads records, so it cannot say whether a field is filled in or used. Say "fields defined", never "unused fields".

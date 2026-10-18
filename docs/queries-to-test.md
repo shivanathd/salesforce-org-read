@@ -47,3 +47,4 @@ Also test the script itself:
 - `bash scripts/org-read-cli.sh <alias> object "Account' OR"` must exit 2 without running a query.
 - Each query's JSON follows a `### <check> <n>/<total>: <label>` line, and the totals match the rows above.
 - A check where every query fails (for example an alias that is not logged in) exits 4 and says so on stderr; a check where only some fail exits 0.
+- The alias must match `^[A-Za-z0-9_.@][A-Za-z0-9_.@-]{0,79}$`: `myorg` and `me@example.com` run, `-x`, `a;b` and an 81-character alias exit 2. An object name over 80 characters exits 2.

@@ -6,7 +6,7 @@
 # and a failure prints sf's error JSON. Exit 4 when every query in the check failed; exit 3 when sf is missing
 # (then stderr says "sf not found"). Exit 2 for bad arguments.
 # The checks object, object-code and field-descriptions take a third argument: an object API name
-# (or, for object-code, the object's EntityDefinition DurableId). It must match ^[A-Za-z0-9_]+$.
+# (or, for object-code, the object's EntityDefinition DurableId). It must match ^[A-Za-z0-9_]{1,80}$.
 set -uo pipefail
 if ! command -v sf >/dev/null 2>&1; then
   echo "sf not found: install the Salesforce CLI (https://developer.salesforce.com/tools/salesforcecli), then run sf org login web" >&2
@@ -18,10 +18,15 @@ if [ $# -lt 2 ] || [ $# -gt 3 ]; then
   exit 2
 fi
 org="$1"; check="$2"; obj="${3:-}"
+# An alias or username: letters, digits and . _ @ - only, not starting with -, at most 80 characters.
+if ! [[ "$org" =~ ^[A-Za-z0-9_.@][A-Za-z0-9_.@-]{0,79}$ ]]; then
+  echo "the org alias may hold only letters, digits and . _ @ - (at most 80 characters, not starting with -)" >&2
+  exit 2
+fi
 case "$check" in
   object|object-code|field-descriptions)
     # The name goes into SOQL, so only letters, digits and underscores are allowed.
-    if ! [[ "$obj" =~ ^[A-Za-z0-9_]+$ ]]; then
+    if ! [[ "$obj" =~ ^[A-Za-z0-9_]{1,80}$ ]]; then
       echo "$check needs an object API name made of letters, digits and underscores, for example Account or Invoice__c" >&2
       exit 2
     fi ;;

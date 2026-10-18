@@ -42,7 +42,7 @@ Server URL: `https://api.salesforce.com/platform/mcp/v1/platform/sobject-reads` 
 
 ## sf CLI
 1. Install the Salesforce CLI if `sf` is not found (the org-read script then prints `sf not found` and exits with code 3).
-2. `sf org login web --alias <alias>` (add `--instance-url https://test.salesforce.com` for a sandbox).
+2. Ask the user to run `sf org login web --alias <alias>` themselves (add `--instance-url https://test.salesforce.com` for a sandbox). Don't run it for them: it opens a browser sign-in and can point an existing alias at a different org.
 3. `sf org list` (without `--verbose`) to confirm the alias is connected.
 4. If `sf` reports `AuthDecryptError`, the saved login can't be read with the current keychain setting. Ask the user to log in again with step 2, and if that fails, to follow the Salesforce CLI troubleshooting guide for keychain errors.
 

@@ -5,13 +5,14 @@ Security hardening from a red-team review.
 - Org text (names, labels, descriptions, error messages) is data: skills never follow instructions in it, never let it change a verdict, and report it if it looks like instructions.
 - New `whoami` check reads only the signed-in user's permission flags. The read warns once if the login can change the org.
 - Only the script's queries run (or the same SOQL on the hosted path); no other SELECT, no user names or emails beyond who last changed Apex and flows. Banned commands named: `sf org display`, `sf org open` (any form), `--verbose` on `sf org` commands.
-- Hosted path checks object names against `^[A-Za-z0-9_]+$` before building SOQL.
+- Hosted path checks object names against `^[A-Za-z0-9_]{1,80}$` before building SOQL.
 - Risky automation counts active triggers and active, non-managed record-triggered flows only. Flow lists and `field-descriptions` read the owner's own items (`NamespacePrefix = null`). The `org` check reads the org's namespace; a namespaced org's code areas are unassessed.
 - Licences compares visible active users with `UsedLicenses`; fewer visible means medium confidence at most. Setup recommends View All Users for the read-only user.
 - A count from a list that hit its limit is "at least <n>", and that area cannot score Finish.
 - Tests: no test runs at all is unassessed, not Rebuild. Failed methods come from the latest run of all tests where that can be told.
 - Untested queries that return 0 rows are unassessed, not zero.
 - Script prints `### <check> <n>/<total>: <label>` before each query's JSON and exits 4 when every query in a check failed.
+- The org alias is checked (letters, digits and . _ @ -, at most 80 characters, not starting with -) and object names are capped at 80 characters. Skills use only the alias the user named, never sf's "Did you mean" suggestion, refer to items by API name and never copy links from the org. org-connect asks the user to run `sf org login web` themselves.
 - Brief writes Cut as "cut (review before removing)". Masked Org Id is the last 4 characters of the 15-character Id.
 - External Client App setup: PKCE, admin-approved users, a refresh token policy; `localhost` callbacks for local clients only.
 - `org-book` writes no org name and warns when the folder is inside a git repository. Privacy policy updated to match.
