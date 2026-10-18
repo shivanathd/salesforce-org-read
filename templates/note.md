@@ -33,6 +33,6 @@ Read-only: nothing in the org was changed.
 <!-- Write each Cut verdict here as "cut (review before removing)". A count from a list that hit its limit is "at least <n>". Drop this line. -->
 > Salesforce org read, <date>: <whole-org verdict>; <n> of 9 areas assessed.
 > Licences <v>, Flows <v>, Risky automation <v>, Tests <v>, Legacy metadata versions <v>, Security <v>, Integrations <v>, Background jobs <v>, Limits <v>.
-> <n> licences to review, <n> inactive flows, <n> Process Builders, <n> Workflow Rules, coverage <n>%, <n> high-risk settings, <n> failing job types.
+> <n> users to review, <n> inactive flows, <n> Process Builders, <n> Workflow Rules, coverage <n>%, <n> high-risk settings, <n> failing job types.
 
 Want this written up properly? Get the written assessment: https://mindcat.ai/contact/org-stuck
