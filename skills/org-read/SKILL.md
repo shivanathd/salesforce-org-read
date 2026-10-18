@@ -26,7 +26,7 @@ allowed-tools: Bash(bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" *)
 - **CLI path**: the user's `sf` CLI is logged in to the org (`sf org list` shows it). Run each check as its own command, exactly in this form:
   `bash "${CLAUDE_PLUGIN_ROOT}/scripts/org-read-cli.sh" <alias> <check>`
   Before each query's JSON the script prints `### <check> <n>/<total>: <label>`. Read each result by its marker, not by position.
-  Exit code 3 means nothing came back: if stderr says `sf not found`, `sf` is not installed (use the `org-connect` skill); otherwise every query in that check failed, so its area is unassessed (read the error JSON for the reason).
+  Exit code 3 means `sf` is not installed (stderr says `sf not found`; use the `org-connect` skill). Exit code 4 means every query in that check failed, so its area is unassessed (read the error JSON for the reason).
 - Use both when both work. If a hosted query fails on a setup object, use the CLI for that check and say so in the note.
 - If neither works, use the `org-connect` skill.
 

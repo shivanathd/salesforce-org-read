@@ -46,4 +46,4 @@ Run a check with `bash scripts/org-read-cli.sh <alias> <check> [object]`, or a s
 Also test the script itself:
 - `bash scripts/org-read-cli.sh <alias> object "Account' OR"` must exit 2 without running a query.
 - Each query's JSON follows a `### <check> <n>/<total>: <label>` line, and the totals match the rows above.
-- A check where every query fails (for example an alias that is not logged in) exits 3 and says so on stderr; a check where only some fail exits 0.
+- A check where every query fails (for example an alias that is not logged in) exits 4 and says so on stderr; a check where only some fail exits 0.

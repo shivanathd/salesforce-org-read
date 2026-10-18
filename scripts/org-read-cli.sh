@@ -156,6 +156,6 @@ for i in "${!queries[@]}"; do
 done
 if [ "$failed" -eq "$total" ]; then
   echo "every query in $check failed: see the error JSON above" >&2
-  exit 3
+  exit 4
 fi
 exit 0

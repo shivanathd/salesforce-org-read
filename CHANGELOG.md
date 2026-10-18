@@ -11,7 +11,7 @@ Security hardening from a red-team review.
 - A count from a list that hit its limit is "at least <n>", and that area cannot score Finish.
 - Tests: no test runs at all is unassessed, not Rebuild. Failed methods come from the latest run of all tests where that can be told.
 - Untested queries that return 0 rows are unassessed, not zero.
-- Script prints `### <check> <n>/<total>: <label>` before each query's JSON and exits 3 when every query in a check failed.
+- Script prints `### <check> <n>/<total>: <label>` before each query's JSON and exits 4 when every query in a check failed.
 - Brief writes Cut as "cut (review before removing)". Masked Org Id is the last 4 characters of the 15-character Id.
 - External Client App setup: PKCE, admin-approved users, a refresh token policy; `localhost` callbacks for local clients only.
 - `org-book` writes no org name and warns when the folder is inside a git repository. Privacy policy updated to match.
