@@ -11,7 +11,7 @@ Org: …<last 4 characters of the 15-character org Id>, <sandbox | production>, 
 | Licences | | | `licences`: User, UserLicense, PermissionSetLicense | |
 | Flows | | | `flows`, `workflow`: FlowDefinitionView, WorkflowRule | |
 | Risky automation | | | `triggers`: ApexTrigger, FlowDefinitionView | |
-| Tests | | | `tests`: ApexTestRunResult, ApexOrgWideCoverage, ApexClass | |
+| Tests | | | `tests`: ApexTestRunResult, ApexOrgWideCoverage, ApexClass, ApexTrigger | |
 | Legacy metadata versions | | | `old-code`: ApexClass, ApexTrigger | |
 | Security | | | `security`, `admins`, `permissions`: SecurityHealthCheck, SecurityHealthCheckRisks, User, PermissionSetAssignment, PermissionSet | |
 | Integrations | | | `integrations`, `packages`: NamedCredential, ConnectedApplication, InstalledSubscriberPackage | |

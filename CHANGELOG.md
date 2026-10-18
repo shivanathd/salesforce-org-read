@@ -30,6 +30,16 @@ Fixes from the 2026-10-18 scratch-org QA:
 - Setup leads with a Minimum Access user plus a permission set; the Read Only profile may be missing in scratch and Developer Edition orgs.
 - `docs/queries-to-test.md` records the results, and notes that `IsAllTests` needs an org with two test classes to test. CONTRIBUTING validates `plugin.json` on its own.
 
+Fixes from code review of PR #1:
+- Ground rules live once, in `docs/ground-rules.md`, which every skill reads first; each skill keeps a 3-rule core. `sf sobject describe` is no longer allowed anywhere.
+- Script: arguments are checked before looking for `sf`; the alias may contain `+` (for usernames like `jane+dev@acme.com`).
+- `inventory` and `fields` read custom objects from EntityDefinition with their real suffix, so custom settings, metadata types and platform events are not counted as custom objects.
+- `tests` also counts triggers: "no Apex to test" needs 0 classes and 0 triggers.
+- `class-coverage` lists the most uncovered lines first; `fields` caps at 500 like its other lists.
+- Licences Cut rests on paid user licences only; permission set licences are information to review.
+- object-read marks Process Builders on one object unassessed (they cannot be listed by object).
+- Skills use `${CLAUDE_PLUGIN_ROOT}` paths for the script and docs.
+
 ## 0.2.0 (2026-10-17)
 - Legacy metadata versions: Apex saved on API 30 or lower is now tech debt to review, not a Rebuild reason. Salesforce's API 21 to 30 retirement affects API calls, not saved Apex. The note says integrations calling old API versions are not checked.
 - Verdict rules rewritten as Mindcat's own, with numbers. Rebuild needs two independent signals in one area; coverage under 75% alone is not enough.
