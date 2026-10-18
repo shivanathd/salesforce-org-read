@@ -23,7 +23,7 @@ Some v0.2 queries have not yet been run on an org; see [docs/queries-to-test.md]
 - **Salesforce edition**: the hosted MCP server needs Enterprise Edition or above, or a Developer Edition org. The sf CLI path works on any org you can log in to with API access.
 - **Salesforce CLI** (`sf`), installed and logged in: `sf org login web --alias <alias>`. The full read needs it, because the hosted server may not reach Tooling API objects (coverage, Workflow Rules, Apex versions, installed packages, Health Check) or org limits.
 - **Permission**: the signed-in user needs "View Setup and Configuration" and API access. Areas the user cannot read are reported as unassessed.
-- **Read-only user (recommended)**: sign in as a user on the standard Read Only profile (confirm it has both permissions above), or as a Minimum Access - Salesforce user with a permission set that grants only API Enabled, View Setup and Configuration and View All Users. Then the org itself blocks any change. Without View All Users, sharing can hide some users from the licence counts. The read tells you once if your login can change the org.
+- **Read-only user (recommended)**: sign in as a user on the standard Read Only profile (confirm it has both permissions above), or as a Minimum Access - Salesforce user with a permission set that grants only API Enabled, View Setup and Configuration and View All Users. This limits what the login can change, but it is not a guarantee: the Read Only profile can still allow some actions (such as Chatter posts), and permission sets add access, so review the user's effective permissions. Without View All Users, sharing can hide some users from the licence counts. The read tells you once if your login can change the org.
 
 ## Install
 ```
@@ -35,7 +35,7 @@ Claude chat, Cowork and Claude Code load the skills and the Salesforce MCP serve
 ## Connect the hosted MCP server (optional)
 Salesforce's standard hosted MCP servers are off by default. An admin sets this up once:
 1. In Setup, Quick Find "MCP Servers", open MCP Servers (under API Catalog), then Salesforce Servers, and activate `sobject-reads`.
-2. Create an External Client App (Setup > External Client App Manager). Enable OAuth with scopes `mcp_api` and `refresh_token`, issue JWT-based access tokens for named users, and add the callback URL for your client (below). Require PKCE, set Permitted Users to admin-approved users (pre-authorized) and give the app only to the read-only user, and set a refresh token policy that expires tokens. `localhost` callbacks are for clients on your own machine only. It can take up to 30 minutes to start working.
+2. Create an External Client App (Setup > External Client App Manager). Enable OAuth with scopes `mcp_api` and `refresh_token`, issue JWT-based access tokens for named users, and add the callback URL for your client (below). Require PKCE, set Permitted Users to admin-approved users (pre-authorized) and give the app only to the read-only user, and set a refresh token policy that expires tokens. `localhost` callbacks are for clients on your own machine only. Salesforce's guide says a scratch org's Setup cannot create an External Client App: create it in the Dev Hub, package it and install it in the scratch org, or use the CLI path for scratch orgs. It can take up to 30 minutes to start working.
 3. Copy the app's Consumer Key (Settings > OAuth Settings > Consumer Key and Secret). Your AI client uses it as the OAuth Client ID.
 
 Then, per client:
@@ -45,7 +45,7 @@ Then, per client:
 
 Server URL: `https://api.salesforce.com/platform/mcp/v1/platform/sobject-reads` (sandbox or scratch: `https://api.salesforce.com/platform/mcp/v1/sandbox/platform/sobject-reads`).
 
-**Check the connection**: ask Claude to run the `org` check. It reads `Organization` (Id, edition, sandbox or production, namespace) on each path. The `whoami` check then reads only the signed-in user's permission flags, to warn you once if the login can change the org. If the hosted server and the CLI point at different orgs, the read stops instead of mixing results.
+**Check the connection**: ask Claude to run the `org` check. It reads `Organization` (Id, edition, sandbox or production, namespace) on each path. The `whoami` check then reads only the signed-in user's permission flags, to warn you once if the login has key write permissions (it checks a few flags, not every permission). If the hosted server and the CLI point at different orgs, the read stops instead of mixing results.
 
 Salesforce's guides:
 - Get started: https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/hosted-mcp-servers-overview.html
