@@ -1,0 +1,26 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Bash syntax
+        run: bash -n scripts/org-read-cli.sh
+      - name: shellcheck
+        run: shellcheck scripts/org-read-cli.sh
+      - name: JSON parse
+        run: |
+          for f in .claude-plugin/plugin.json .claude-plugin/marketplace.json .cursor-plugin/plugin.json .mcp.json mcp.json; do
+            python3 -c 'import json, sys; json.load(open(sys.argv[1]))' "$f"
+            echo "ok $f"
+          done
